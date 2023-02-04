@@ -1,16 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
-
-import { useLazyQuery } from "@apollo/client";
+import { ADD_TOPPING } from "@/helpers/mutations/toppings";
+import { useLazyQuery, useMutation } from "@apollo/client";
 
 const ManagerPage = () => {
-  const dummyToppings = [
-    { name: "Shredded Cheese", quantity: 20 },
-    { name: "Pepperoni", quantity: 10 },
-  ];
-
-  const [toppingsList, setToppingsList] = useState(dummyToppings);
+  const [toppingsList, setToppingsList] = useState([]);
   const [toppingInput, setToppingInput] = useState("");
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [selectedTopping, setSelectedTopping] = useState("");
@@ -19,6 +14,20 @@ const ManagerPage = () => {
     useLazyQuery(GET_TOPPINGS, {
       fetchPolicy: "cache-and-network",
     });
+
+  const [
+    addTopping,
+    { loading: toppingUpdateLoading, error: addToppingError },
+  ] = useMutation(ADD_TOPPING, {
+    refetchQueries: [{ query: GET_TOPPINGS }],
+  });
+
+  const [
+    removeTopping,
+    { loading: removeToppingLoading, error: removeToppingError },
+  ] = useMutation(ADD_TOPPING, {
+    refetchQueries: [{ query: GET_TOPPINGS }],
+  });
 
   useEffect(() => {
     getToppings();
@@ -89,7 +98,7 @@ const ManagerPage = () => {
     }
   };
 
-  const handleFormSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     console.log("IN HANDLE SUBMIT FORM", { e });
@@ -98,27 +107,37 @@ const ManagerPage = () => {
     ).length;
 
     if (filtered < 1) {
-      // IF not in list already;
-      setToppingsList([
-        ...toppingsList,
-        { name: toppingInput, quantity: toppingQuantity },
-      ]);
+      await addTopping({
+        variables: { name: toppingInput, quantity: toppingQuantity },
+      });
     } else {
       // TODO: build in confirmation/declanation of the message if not in editm
       alert(
         "Topping already exists, would you like to replace the quantity of this topping instead?"
       );
 
-      let updatedQuantities = toppingsList.map((topping) => {
-        if (topping.name === toppingInput) {
-          // TODO: Resolve string to number conversion here
-          topping.quantity = toppingQuantity;
-        }
+      //   let updatedQuantities = toppingsList.map((topping) => {
+      //     if (topping.name === toppingInput) {
+      //       // TODO: Resolve string to number conversion here
+      //       console.log({ topping });
+      //       topping.quantity = toppingQuantity;
+      //     }
 
-        return topping;
+      //     return topping;
+      //   });
+
+      let filteredTopping = toppingsList.filter(
+        (topping) => topping.name === toppingInput
+      );
+      let result = { ...filteredTopping[0] };
+
+      result.quantity = toppingQuantity;
+
+      await addTopping({
+        variables: result,
       });
 
-      setToppingsList([...updatedQuantities]);
+      //   setToppingsList([...updatedQuantities]);
     }
 
     // CLOSES OUT EDIT MODE OF FIELD

@@ -8,27 +8,48 @@ export const ToppingsResolver = {
       try {
         let toppings = await Toppings.find({});
 
-        console.log({ toppings }, "AFTER SEARCH");
-
         return toppings;
       } catch (err) {
         return err;
       }
     },
   },
-  // mutations: {
-  //   addTopping: async (_, { name, quantity }) => {
-  //     try {
-  //       let existingTopping = await Toppings.findOne({ name });
+  mutations: {
+    addTopping: async (_, { name, quantity }) => {
+      try {
+        let existingTopping = await Toppings.findOne({ name });
 
-  //       if (existingTopping) {
-  //         console.log({ existingTopping }, "IN ADD TOPPING");
-  //       } else {
-  //         console.log("NOT IN EXISTING TOPPINGS", { name, quantity });
-  //       }
-  //     } catch (err) {
-  //       console.log({ err });
-  //     }
-  //   },
-  // },
+        if (existingTopping) {
+          console.log({ existingTopping, name, quantity }, "IN ADD TOPPING");
+          existingTopping.quantity = quantity;
+          await existingTopping.save();
+          return existingTopping;
+        } else {
+          let newTopping = new Toppings({ name, quantity });
+
+          console.log("NOT IN EXISTING TOPPINGS", { newTopping });
+
+          let result = await newTopping.save();
+
+          return result;
+        }
+      } catch (err) {
+        console.log({ err });
+      }
+    },
+    removeTopping: async (_, { name }) => {
+      try {
+        let toppingsList = await Toppings.find({});
+
+        let filteredList = toppingsList.filter(
+          (topping) => topping.name !== name
+        );
+
+        let results = filteredList.save();
+        return results;
+      } catch (err) {
+        console.log({ err }, "IN REMOVE TOPPING");
+      }
+    },
+  },
 };
