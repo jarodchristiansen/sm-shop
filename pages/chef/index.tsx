@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+import { GET_TOPPINGS } from "@/helpers/queries/toppings";
+import { useLazyQuery } from "@apollo/client/react";
+import React, { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 
 const ChefPage = () => {
@@ -18,17 +20,29 @@ const ChefPage = () => {
 
   const [existingPizzas, setExistingPizzas] = useState(dummyPizas);
   const [chefView, setChefView] = useState("Existing");
-  const dummyToppings = [
-    { name: "Shredded Cheese", quantity: 20 },
-    { name: "Pepperoni", quantity: 10 },
-  ];
 
-  const [toppingsList, setToppingsList] = useState(dummyToppings);
   const [toppingInput, setToppingInput] = useState("");
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [selectedTopping, setSelectedTopping] = useState("");
   const [currentPizza, setCurrentPizza] = useState([]);
   const [editSelect, setEditSelect] = useState();
+
+  const [toppingsList, setToppingsList] = useState([]);
+
+  const [getToppings, { data, loading, error, refetch, fetchMore }] =
+    useLazyQuery(GET_TOPPINGS, {
+      fetchPolicy: "cache-and-network",
+    });
+
+  useEffect(() => {
+    getToppings();
+  }, []);
+
+  useEffect(() => {
+    if (data?.getCurrentToppings) {
+      setToppingsList(data.getCurrentToppings);
+    }
+  }, [data]);
 
   const handleToppingQuantity = (e) => {
     let value = parseInt(e.target.value);
@@ -51,7 +65,7 @@ const ChefPage = () => {
             min={0}
             max={topping.quantity}
             name="quantity"
-            defaultValue={0}
+            defaultValue={topping.quantity}
             onChange={handleToppingQuantity}
           />
           <button onClick={(e) => addIngredientToPizzaList(topping)}>
