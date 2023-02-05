@@ -14,8 +14,6 @@ const ManagerPage = () => {
 
   const { message, setMessage } = useContext(Message_data);
 
-  console.log({ message }, "IN MANAGER PAGE");
-
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery(GET_TOPPINGS, {
       fetchPolicy: "cache-and-network",
