@@ -1,14 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
 import { ADD_TOPPING } from "@/helpers/mutations/toppings";
 import { useLazyQuery, useMutation } from "@apollo/client";
+
+import { Message_data } from "../../contexts/role";
 
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
   const [toppingInput, setToppingInput] = useState("");
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [selectedTopping, setSelectedTopping] = useState("");
+
+  const { message, setMessage } = useContext(Message_data);
+
+  console.log({ message }, "IN MANAGER PAGE");
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery(GET_TOPPINGS, {

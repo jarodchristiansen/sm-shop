@@ -3,10 +3,13 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import styled from "styled-components";
 
+import { Message_data } from "../contexts/role";
+import { useContext, useEffect } from "react";
+import { useRouter } from "next/router";
+
 export default function Home() {
   const { data: session, status } = useSession();
-
-  console.log({ session });
+  const { message, setMessage } = useContext(Message_data);
 
   return (
     <AlternateHomePageWrapper>
@@ -17,12 +20,16 @@ export default function Home() {
           <h4>If you are a </h4>
 
           <div className="card-container">
-            <div>
+            <div onClick={(e) => setMessage("Manager")}>
               <h5>Manager</h5>
+
+              {message === "Manager" && <div>YEEE</div>}
             </div>
 
-            <div>
+            <div onClick={(e) => setMessage("Chef")}>
               <h5>Chef</h5>
+
+              {message === "Chef" && <div>YEEE</div>}
             </div>
           </div>
         </div>

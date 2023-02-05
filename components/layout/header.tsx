@@ -2,13 +2,14 @@ import Link from "next/link";
 import { Navbar, Container, Nav, NavDropdown } from "react-bootstrap";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import styled from "styled-components";
 import { MediaQueries } from "@/styles/MediaQueries";
 import { Colors } from "@/styles/Colors";
 import { motion } from "framer-motion";
 
+import { Message_data } from "../../contexts/role";
 /**
  *
  * @returns Header component above pages
@@ -16,6 +17,10 @@ import { motion } from "framer-motion";
 function Header() {
   const { data: session, status } = useSession();
   const [selectedRoute, setSelectedRoute] = useState<string | number>("");
+
+  const { message, setMessage } = useContext(Message_data);
+
+  console.log({ message }, "in header");
 
   const router = useRouter();
   const { asPath } = router;
