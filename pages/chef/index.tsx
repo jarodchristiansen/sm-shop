@@ -12,7 +12,8 @@ const ChefPage = () => {
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [selectedTopping, setSelectedTopping] = useState("");
   const [currentPizza, setCurrentPizza] = useState([]);
-  const [editSelect, setEditSelect] = useState();
+
+  const [editSelectPizza, setEditSelectPizza] = useState<any>();
 
   const [toppingsList, setToppingsList] = useState([]);
 
@@ -139,7 +140,7 @@ const ChefPage = () => {
             })}
           </div>
 
-          <button>Edit</button>
+          <button onClick={(e) => setEditSelectPizza(pizza)}>Edit</button>
         </PizzaRow>
       );
     });
@@ -148,7 +149,7 @@ const ChefPage = () => {
   return (
     <PageContain>
       Chef Page
-      {chefView === "Existing" && (
+      {chefView === "Existing" && !editSelectPizza && (
         <>
           {ExistingPizzas}
 
@@ -156,6 +157,22 @@ const ChefPage = () => {
             Make a new Pizza
           </button>
         </>
+      )}
+      {chefView === "Existing" && !!editSelectPizza && (
+        // TODO: Add button to deselect/save changes to existing pizza
+        <div>
+          <span>Customer: {editSelectPizza.name}</span>
+          {editSelectPizza.ingredients.map((ingredient: any) => {
+            return (
+              <div>
+                {/* TODO: make Inputs  */}
+                <span>Ingredient Name: {ingredient?.name}</span>
+                <span> (x{ingredient?.quantity})</span>
+              </div>
+            );
+          })}
+          {/* <span>Customer: {editSelectPizza.name}</span> */}
+        </div>
       )}
       {chefView === "Create" && (
         <>
