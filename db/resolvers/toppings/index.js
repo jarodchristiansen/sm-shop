@@ -3,8 +3,6 @@ import Toppings from "../../models/topping";
 export const ToppingsResolver = {
   queries: {
     getCurrentToppings: async (_, {}) => {
-      console.log("FIRING GET CURRENT TOPPINGS");
-
       try {
         let toppings = await Toppings.find({});
 
@@ -20,14 +18,11 @@ export const ToppingsResolver = {
         let existingTopping = await Toppings.findOne({ name });
 
         if (existingTopping) {
-          console.log({ existingTopping, name, quantity }, "IN ADD TOPPING");
           existingTopping.quantity = quantity;
           await existingTopping.save();
           return existingTopping;
         } else {
           let newTopping = new Toppings({ name, quantity });
-
-          console.log("NOT IN EXISTING TOPPINGS", { newTopping });
 
           let result = await newTopping.save();
 
@@ -37,16 +32,11 @@ export const ToppingsResolver = {
         console.log({ err });
       }
     },
+
     removeTopping: async (_, { name }) => {
       try {
-        let toppingsList = await Toppings.find({});
-
-        let filteredList = toppingsList.filter(
-          (topping) => topping.name !== name
-        );
-
-        let results = filteredList.save();
-        return results;
+        let toppingsList = await Toppings.findOne({ name }).remove();
+        return toppingsList;
       } catch (err) {
         console.log({ err }, "IN REMOVE TOPPING");
       }

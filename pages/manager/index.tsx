@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
-import { ADD_TOPPING } from "@/helpers/mutations/toppings";
+import { ADD_TOPPING, REMOVE_TOPPING } from "@/helpers/mutations/toppings";
 import { useLazyQuery, useMutation } from "@apollo/client";
 
 import { Message_data } from "../../contexts/role";
@@ -32,18 +32,20 @@ const ManagerPage = () => {
   const [
     removeTopping,
     { loading: removeToppingLoading, error: removeToppingError },
-  ] = useMutation(ADD_TOPPING, {
+  ] = useMutation(REMOVE_TOPPING, {
     refetchQueries: [{ query: GET_TOPPINGS }],
   });
 
   useEffect(() => {
-    // TODO: Move to server side if possible from context
-    // Will probably require cookies instead of localStorage
-    if (message && message === "Manager") {
-      getToppings();
-    } else {
-      router.push("/");
-    }
+    getToppings();
+
+    // // TODO: Move to server side if possible from context
+    // // Will probably require cookies instead of localStorage
+    // if (message && message === "Manager") {
+    //   getToppings();
+    // } else {
+    //   router.push("/");
+    // }
   }, []);
 
   useEffect(() => {
@@ -66,7 +68,12 @@ const ManagerPage = () => {
             </>
           ) : (
             <>
-              <button onClick={(e) => handleRemoveIngredient(topping)}>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleRemoveIngredient(topping);
+                }}
+              >
                 X
               </button>
               <label htmlFor="topping_name">Topping Name</label>
@@ -166,9 +173,11 @@ const ManagerPage = () => {
   const handleRemoveIngredient = (e: any) => {
     let name = e.name;
 
-    let newList = toppingsList.filter((topping) => topping.name !== name);
+    removeTopping({ variables: { name } });
 
-    setToppingsList(newList);
+    // let newList = toppingsList.filter((topping) => topping.name !== name);
+
+    // setToppingsList(newList);
   };
 
   return (

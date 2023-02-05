@@ -2,7 +2,9 @@ import { gql } from "@apollo/client";
 
 export const REMOVE_TOPPING = gql`
   mutation removeTopping($name: String) {
-    removeTopping(name: $name)
+    removeTopping(name: $name) {
+      name
+    }
   }
 `;
 
