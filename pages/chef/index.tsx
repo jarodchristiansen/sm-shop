@@ -97,7 +97,7 @@ const ChefPage = () => {
           <label htmlFor="quantity">quantity</label>
 
           <button onClick={(e) => addIngredientToPizzaList(topping)}>-</button>
-          <input
+          {/* <input
             type="number"
             min={0}
             max={10}
@@ -105,7 +105,8 @@ const ChefPage = () => {
             defaultValue={topping.quantity}
             onChange={handleToppingQuantity}
             disabled
-          />
+          /> */}
+          <span>{topping.quantity}</span>
         </div>
       );
     });
@@ -116,19 +117,21 @@ const ChefPage = () => {
 
     return existingPizzas.map((pizza) => {
       return (
-        <div key={pizza.name}>
+        <PizzaRow key={pizza.name}>
           <span>Pizza: {pizza.name}</span>
 
-          {pizza.ingredients.map((topping) => {
-            return (
-              <span>
-                Ingredient: {topping.name} - (x{topping.quantity})
-              </span>
-            );
-          })}
+          <div className="ingredient-column">
+            {pizza.ingredients.map((topping) => {
+              return (
+                <span>
+                  {topping.name} - (x{topping.quantity})
+                </span>
+              );
+            })}
+          </div>
 
           <button>Edit</button>
-        </div>
+        </PizzaRow>
       );
     });
   }, [existingPizzas]);
@@ -137,31 +140,56 @@ const ChefPage = () => {
     <PageContain>
       Chef Page
       {chefView === "Existing" && (
-        <div>
+        <>
           {ExistingPizzas}
 
           <button onClick={(e) => setChefView("Create")}>
             Make a new Pizza
           </button>
-        </div>
+        </>
       )}
       {chefView === "Create" && (
-        <ListsContainer>
-          <div>
-            <h4>Adding Ingredients</h4>
-            {AvailableToppings}
-          </div>
+        <>
+          <button onClick={(e) => setChefView("Existing")}>
+            See Existing Pizzas
+          </button>
+          <ListsContainer>
+            <div>
+              <h4>Adding Ingredients</h4>
+              {AvailableToppings}
+            </div>
 
-          <div>
-            <h4>Current Pizza</h4>
+            <div>
+              <h4>Current Pizza</h4>
 
-            {CurrentPizzaIngredients}
-          </div>
-        </ListsContainer>
+              {CurrentPizzaIngredients}
+            </div>
+          </ListsContainer>
+        </>
       )}
     </PageContain>
   );
 };
+
+const PizzaRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  border: 2px solid black;
+  width: 100%;
+  max-width: 50rem;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  align-items: center;
+
+  .ingredient-column {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding: 0 1rem;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+  }
+`;
 
 const ListsContainer = styled.div`
   display: flex;

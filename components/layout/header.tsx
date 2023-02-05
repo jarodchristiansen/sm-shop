@@ -20,8 +20,6 @@ function Header() {
 
   const { message, setMessage } = useContext(Message_data);
 
-  console.log({ message }, "in header");
-
   const router = useRouter();
   const { asPath } = router;
 

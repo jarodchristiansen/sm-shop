@@ -59,6 +59,9 @@ const ManagerPage = () => {
             </>
           ) : (
             <>
+              <button onClick={(e) => handleRemoveIngredient(topping)}>
+                X
+              </button>
               <label htmlFor="topping_name">Topping Name</label>
               <input
                 type="text"
@@ -74,10 +77,6 @@ const ManagerPage = () => {
                 name="quantity"
                 defaultValue={topping.quantity}
               />
-
-              <button onClick={(e) => handleRemoveIngredient(topping)}>
-                X
-              </button>
 
               <button type="submit">Submit</button>
             </>
@@ -181,11 +180,25 @@ const ManagerPage = () => {
         <button type="submit">Submit</button>
 
         <div>Toppings list</div>
-        {ToppingsItems}
+
+        <ListContainer>{ToppingsItems}</ListContainer>
       </ToppingsForm>
     </PageContain>
   );
 };
+
+const ListContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-width: 30rem;
+
+  div {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    border: 1px solid black;
+  }
+`;
 
 const ToppingsForm = styled.form`
   display: flex;
