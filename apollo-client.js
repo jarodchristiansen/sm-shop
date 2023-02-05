@@ -5,7 +5,7 @@ const configBaseURL = () => {
   if (process.env.BASE_URL === "http://localhost:3000") {
     return "http://localhost:3000/api/graphql";
   } else {
-    return "https://hodl-watch.vercel.app/api/graphql";
+    return "https://sm-pizza-shop.vercel.app/api/graphql";
   }
 };
 
