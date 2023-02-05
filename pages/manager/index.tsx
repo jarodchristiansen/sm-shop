@@ -5,6 +5,7 @@ import { ADD_TOPPING } from "@/helpers/mutations/toppings";
 import { useLazyQuery, useMutation } from "@apollo/client";
 
 import { Message_data } from "../../contexts/role";
+import { useRouter } from "next/router";
 
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
@@ -13,6 +14,8 @@ const ManagerPage = () => {
   const [selectedTopping, setSelectedTopping] = useState("");
 
   const { message, setMessage } = useContext(Message_data);
+
+  const router = useRouter();
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery(GET_TOPPINGS, {
@@ -34,7 +37,13 @@ const ManagerPage = () => {
   });
 
   useEffect(() => {
-    getToppings();
+    // TODO: Move to server side if possible from context
+    // Will probably require cookies instead of localStorage
+    if (message && message === "Manager") {
+      getToppings();
+    } else {
+      router.push("/");
+    }
   }, []);
 
   useEffect(() => {
