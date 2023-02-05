@@ -38,7 +38,13 @@ const typeDefs = gql`
     quantity: Float!
   }
 
+  type Pizza {
+    name: String
+    ingredients: [Topping]
+  }
+
   type Query {
+    getExistingPizzas: [Pizza]
     getCurrentToppings: [Topping]
     getUser(email: String, id: String): User
   }

@@ -2,23 +2,10 @@ import { GET_TOPPINGS } from "@/helpers/queries/toppings";
 import { useLazyQuery } from "@apollo/client/react";
 import React, { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
+import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 
 const ChefPage = () => {
-  const dummyPizas = [
-    {
-      name: "Cheese Pizza",
-      ingredients: [{ name: "Shredded Cheese", quantity: 2 }],
-    },
-    {
-      name: "Pepperoni",
-      ingredients: [
-        { name: "Shredded Cheese", quantity: 1 },
-        { name: "Pepperoni", quantity: 2 },
-      ],
-    },
-  ];
-
-  const [existingPizzas, setExistingPizzas] = useState(dummyPizas);
+  const [existingPizzas, setExistingPizzas] = useState([]);
   const [chefView, setChefView] = useState("Existing");
 
   const [toppingInput, setToppingInput] = useState("");
@@ -34,8 +21,22 @@ const ChefPage = () => {
       fetchPolicy: "cache-and-network",
     });
 
+  const [
+    getExistingPizzas,
+    {
+      data: pizzaData,
+      loading: pizzasLoading,
+      error: pizzasError,
+      refetch: refetchPizzas,
+      fetchMore: fetchMorePizzas,
+    },
+  ] = useLazyQuery(GET_EXISTING_PIZZAS, {
+    fetchPolicy: "cache-and-network",
+  });
+
   useEffect(() => {
     getToppings();
+    getExistingPizzas();
   }, []);
 
   useEffect(() => {
@@ -43,6 +44,12 @@ const ChefPage = () => {
       setToppingsList(data.getCurrentToppings);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (pizzaData?.getExistingPizzas) {
+      setExistingPizzas(pizzaData.getExistingPizzas);
+    }
+  }, [pizzaData]);
 
   const handleToppingQuantity = (e) => {
     let value = parseInt(e.target.value);
@@ -115,13 +122,15 @@ const ChefPage = () => {
   const ExistingPizzas = useMemo(() => {
     if (!existingPizzas.length) return [];
 
+    console.log({ existingPizzas });
+
     return existingPizzas.map((pizza) => {
       return (
         <PizzaRow key={pizza.name}>
           <span>Pizza: {pizza.name}</span>
 
           <div className="ingredient-column">
-            {pizza.ingredients.map((topping) => {
+            {pizza?.ingredients.map((topping) => {
               return (
                 <span>
                   {topping.name} - (x{topping.quantity})
