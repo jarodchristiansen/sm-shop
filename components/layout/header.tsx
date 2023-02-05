@@ -46,7 +46,12 @@ function Header() {
       guarded: message === "Manager",
       text: "Manager",
     },
-    { key: 2, route: `/chef`, guarded: message === "Chef", text: "Chef" },
+    {
+      key: 2,
+      route: `/chef`,
+      guarded: message === "Chef" || message == "Manager",
+      text: "Chef",
+    },
     // !session && {
     //   key: 5,
     //   route: "/auth?path=SignIn",
@@ -73,6 +78,8 @@ function Header() {
     return routes.map((route, idx) => {
       if (!route?.key) return;
 
+      console.log({ route }, !!route.guarded);
+
       return (
         <div key={route?.route}>
           {!!route.guarded && (
@@ -84,18 +91,18 @@ function Header() {
             </TextContainer>
           )}
 
-          {!route.guarded && (
+          {/* {!route.guarded && (
             <TextContainer>
               <Link href={route.route}>{route.text}</Link>
               {selectedRoute == route.key && (
                 <h6 className="active-underline-span"></h6>
               )}
             </TextContainer>
-          )}
+          )} */}
         </div>
       );
     });
-  }, [routes?.length, selectedRoute, session]);
+  }, [routes?.length, selectedRoute, session, message]);
 
   return (
     <Navbar
