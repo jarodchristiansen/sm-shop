@@ -7,6 +7,7 @@ import Image from "next/image";
 import styled from "styled-components";
 import { MediaQueries } from "@/styles/MediaQueries";
 import { Colors } from "@/styles/Colors";
+import { motion } from "framer-motion";
 
 /**
  *
@@ -102,13 +103,26 @@ function Header() {
       <Container>
         <Navbar.Brand onClick={() => setSelectedRoute("")}>
           <Link href={"/"} passHref legacyBehavior>
-            <Image
-              src={"/assets/cube-svgrepo-com.svg"}
-              className={"pointer-link"}
-              height={50}
-              width={50}
-              alt="block-logo"
-            />
+            <motion.div
+              initial={{ y: 0 }}
+              animate={{ y: [7, 0] }}
+              // exit={{ y: 300, opacity: 0 }}
+              transition={{
+                // type: "spring",
+                duration: 3,
+                damping: 20,
+                repeat: Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              }}
+            >
+              <Image
+                src="/assets/retail.svg"
+                height={100}
+                width={120}
+                alt="retail logo"
+              />
+            </motion.div>
           </Link>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />

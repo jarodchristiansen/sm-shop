@@ -10,19 +10,23 @@ export default function Home() {
 
   return (
     <AlternateHomePageWrapper>
-      <h1>Home Page</h1>
+      <div>
+        <h1>StrongMind Pizza</h1>
 
-      {/* {session && session.user.role === "admin" ? (
-        <div>
-          <h1>Admin</h1>
-          <p>Welcome to the Admin Portal!</p>
+        <div className="top-card">
+          <h4>If you are a </h4>
+
+          <div className="card-container">
+            <div>
+              <h5>Manager</h5>
+            </div>
+
+            <div>
+              <h5>Chef</h5>
+            </div>
+          </div>
         </div>
-      ) : (
-        <div>
-          {session?.user}
-          <h1>You are not authorized to view this page!</h1>
-        </div>
-      )} */}
+      </div>
     </AlternateHomePageWrapper>
   );
 }
@@ -33,4 +37,20 @@ const AlternateHomePageWrapper = styled.div`
   width: 100%;
   justify-content: center;
   align-items: center;
+  padding: 2rem;
+
+  .top-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+    gap: 2rem;
+
+    .card-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 3rem;
+    }
+  }
 `;

@@ -50,6 +50,18 @@ const ChefPage = () => {
     setToppingQuantity(value);
   };
 
+  const addIngredientToPizzaList = (topping) => {
+    console.log(
+      { topping, toppingQuantity },
+      "IN ADD INGREDIENT TO PIZZA LIST"
+    );
+
+    setCurrentPizza([
+      ...currentPizza,
+      { name: topping.name, quantity: toppingQuantity },
+    ]);
+  };
+
   const AvailableToppings = useMemo(() => {
     if (!toppingsList.length) return [];
 
@@ -57,7 +69,6 @@ const ChefPage = () => {
       return (
         <div key={topping.name}>
           <span>Topping: {topping.name}</span>
-          {/* <span>Quantity: {topping.quantity}</span> */}
 
           <label htmlFor="quantity">Quantity Avail</label>
           <input
@@ -66,11 +77,10 @@ const ChefPage = () => {
             max={topping.quantity}
             name="quantity"
             defaultValue={topping.quantity}
-            onChange={handleToppingQuantity}
+            disabled
           />
-          <button onClick={(e) => addIngredientToPizzaList(topping)}>
-            Add
-          </button>
+
+          <button onClick={(e) => addIngredientToPizzaList(topping)}>+</button>
         </div>
       );
     });
@@ -84,7 +94,9 @@ const ChefPage = () => {
         <div key={topping.name}>
           <span>Topping: {topping.name}</span>
 
-          <label htmlFor="quantity">Quantity Avail</label>
+          <label htmlFor="quantity">quantity</label>
+
+          <button onClick={(e) => addIngredientToPizzaList(topping)}>-</button>
           <input
             type="number"
             min={0}
@@ -94,25 +106,10 @@ const ChefPage = () => {
             onChange={handleToppingQuantity}
             disabled
           />
-          <button onClick={(e) => addIngredientToPizzaList(topping)}>
-            Add
-          </button>
         </div>
       );
     });
   }, [currentPizza, toppingQuantity]);
-
-  const addIngredientToPizzaList = (topping) => {
-    console.log(
-      { topping, toppingQuantity },
-      "IN ADD INGREDIENT TO PIZZA LIST"
-    );
-
-    setCurrentPizza([
-      ...currentPizza,
-      { name: topping.name, quantity: toppingQuantity },
-    ]);
-  };
 
   const ExistingPizzas = useMemo(() => {
     if (!existingPizzas.length) return [];
@@ -169,6 +166,7 @@ const ChefPage = () => {
 const ListsContainer = styled.div`
   display: flex;
   flex-direction: row;
+  gap: 2rem;
 `;
 
 const PageContain = styled.div`
