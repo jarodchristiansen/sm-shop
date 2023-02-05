@@ -39,20 +39,20 @@ function Header() {
     setSelectedRoute(selectedKey);
   };
 
-  // @ts-ignore: next-auth type issue v3
-  let id = session?.user?.username;
-
   const routes = [
-    { key: 1, route: "/manager", guarded: false, text: "Manager" },
-    { key: 2, route: `/chef`, guarded: false, text: "Chef" },
-    // { key: 3, route: "/news", guarded: false, text: "News" },
-    // { key: 4, route: "/education", guarded: false, text: "Background" },
-    !session && {
-      key: 5,
-      route: "/auth?path=SignIn",
-      guarded: false,
-      text: "Sign In",
+    {
+      key: 1,
+      route: "/manager",
+      guarded: message === "Manager",
+      text: "Manager",
     },
+    { key: 2, route: `/chef`, guarded: message === "Chef", text: "Chef" },
+    // !session && {
+    //   key: 5,
+    //   route: "/auth?path=SignIn",
+    //   guarded: false,
+    //   text: "Sign In",
+    // },
   ];
 
   useEffect(() => {
@@ -75,7 +75,7 @@ function Header() {
 
       return (
         <div key={route?.route}>
-          {!!route.guarded && !!session && (
+          {!!route.guarded && (
             <TextContainer>
               <Link href={route.route}>{route.text}</Link>
               {selectedRoute == route.key && (
