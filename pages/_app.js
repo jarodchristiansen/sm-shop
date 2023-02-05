@@ -4,6 +4,7 @@ import { ApolloProvider } from "@apollo/client";
 import { SessionProvider } from "next-auth/react";
 import client from "../apollo-client";
 import Layout from "../components/layout/layout.tsx";
+import RoleContext from "../contexts/role";
 
 /**
  *
@@ -16,9 +17,11 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
     <>
       <SessionProvider session={pageProps.session} store={[]}>
         <ApolloProvider client={client}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
+          <RoleContext>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </RoleContext>
         </ApolloProvider>
       </SessionProvider>
     </>

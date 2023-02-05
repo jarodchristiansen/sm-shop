@@ -1,14 +1,8 @@
 import { MediaQueries } from "@/styles/MediaQueries";
-import { useSession } from "next-auth/react";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styled from "styled-components";
-import {
-  FaInstagram,
-  FaFacebook,
-  FaTwitter,
-  FaInstagramSquare,
-} from "react-icons/fa";
 
 /**
  *
@@ -16,55 +10,30 @@ import {
  */
 const Footer = () => {
   const router = useRouter();
-  // const { data: session, status } = useSession();
-
-  //@ts-ignore: next-auth issue v3
-  // let id = session?.user?.id;
-
-  const routerToProfile = (manage) => {
-    // if (id && manage) {
-    //   router.push(`/user/${id}?view=edit_user`);
-    // } else if (id) {
-    //   router.push(`/user/${id}`);
-    // } else {
-    //   router.push("/auth?path=SignUp");
-    // }
-  };
 
   return (
     <FooterContainer>
       <div className="text-column">
         <InfoColumnsContainer>
           <div className="info-column">
-            <h4>News & Info</h4>
+            <h4>Live Details</h4>
 
             <Link href="/news" passHref legacyBehavior>
               <a>
-                <h6>Newsfeed</h6>
-              </a>
-            </Link>
-
-            <Link href="/terms-of-service" passHref legacyBehavior>
-              <a>
-                <h6>Terms of Service</h6>
+                <h6>Toppings</h6>
               </a>
             </Link>
           </div>
           <div className="info-column">
             <h4>Resources</h4>
 
-            <Link href="/assets">
-              <h6>Assets</h6>
+            <Link href="/auth">
+              <h6>Sign In</h6>
             </Link>
 
             <Link href="/education">
               <h6>Education</h6>
             </Link>
-          </div>
-          <div className="info-column">
-            <h4>Users</h4>
-            <h6 onClick={() => routerToProfile(false)}>Profile</h6>
-            <h6 onClick={() => routerToProfile(true)}>Manage Account</h6>
           </div>
         </InfoColumnsContainer>
       </div>

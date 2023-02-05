@@ -9,6 +9,7 @@ import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 // import EmailProvider from "next-auth/providers/email"
 import clientPromise from "../../../lib/mongodb";
 import User from "../../../db/models/user";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 function makeid(length) {
   var result = "";
@@ -47,13 +48,31 @@ export const authOptions = {
     //   clientId: process.env.FACEBOOK_ID,
     //   clientSecret: process.env.FACEBOOK_SECRET,
     // }),
-    GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET,
-    }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_SECRET,
+
+    // GithubProvider({
+    //   clientId: process.env.GITHUB_ID,
+    //   clientSecret: process.env.GITHUB_SECRET,
+    // }),
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_ID,
+    //   clientSecret: process.env.GOOGLE_SECRET,
+    // }),
+    CredentialsProvider({
+      id: "intranet-credentials",
+      name: "Two Factor Auth",
+      async authorize(credentials, req) {
+        try {
+          const user = await User.findOne({
+            email: "jarodchristiansendevelopment@gmail.com",
+          });
+          console.log({ credentials, req, user }, "IN CRED PROVIDER");
+          if (user) {
+            return user;
+          }
+        } catch (err) {
+          console.log({ err });
+        }
+      },
     }),
     // TwitterProvider({
     //   clientId: process.env.TWITTER_ID,

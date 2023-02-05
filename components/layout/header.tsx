@@ -2,12 +2,14 @@ import Link from "next/link";
 import { Navbar, Container, Nav, NavDropdown } from "react-bootstrap";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import styled from "styled-components";
 import { MediaQueries } from "@/styles/MediaQueries";
 import { Colors } from "@/styles/Colors";
+import { motion } from "framer-motion";
 
+import { Message_data } from "../../contexts/role";
 /**
  *
  * @returns Header component above pages
@@ -15,6 +17,8 @@ import { Colors } from "@/styles/Colors";
 function Header() {
   const { data: session, status } = useSession();
   const [selectedRoute, setSelectedRoute] = useState<string | number>("");
+
+  const { message, setMessage } = useContext(Message_data);
 
   const router = useRouter();
   const { asPath } = router;
@@ -33,20 +37,25 @@ function Header() {
     setSelectedRoute(selectedKey);
   };
 
-  // @ts-ignore: next-auth type issue v3
-  let id = session?.user?.username;
-
   const routes = [
-    { key: 1, route: "/manager", guarded: false, text: "Manager" },
-    { key: 2, route: `/chef`, guarded: false, text: "Chef" },
-    // { key: 3, route: "/news", guarded: false, text: "News" },
-    // { key: 4, route: "/education", guarded: false, text: "Background" },
-    !session && {
-      key: 5,
-      route: "/auth?path=SignIn",
-      guarded: false,
-      text: "Sign In",
+    {
+      key: 1,
+      route: "/manager",
+      guarded: message === "Manager",
+      text: "Manager",
     },
+    {
+      key: 2,
+      route: `/chef`,
+      guarded: message === "Chef" || message == "Manager",
+      text: "Chef",
+    },
+    // !session && {
+    //   key: 5,
+    //   route: "/auth?path=SignIn",
+    //   guarded: false,
+    //   text: "Sign In",
+    // },
   ];
 
   useEffect(() => {
@@ -67,9 +76,11 @@ function Header() {
     return routes.map((route, idx) => {
       if (!route?.key) return;
 
+      console.log({ route }, !!route.guarded);
+
       return (
         <div key={route?.route}>
-          {!!route.guarded && !!session && (
+          {!!route.guarded && (
             <TextContainer>
               <Link href={route.route}>{route.text}</Link>
               {selectedRoute == route.key && (
@@ -78,18 +89,18 @@ function Header() {
             </TextContainer>
           )}
 
-          {!route.guarded && (
+          {/* {!route.guarded && (
             <TextContainer>
               <Link href={route.route}>{route.text}</Link>
               {selectedRoute == route.key && (
                 <h6 className="active-underline-span"></h6>
               )}
             </TextContainer>
-          )}
+          )} */}
         </div>
       );
     });
-  }, [routes?.length, selectedRoute, session]);
+  }, [routes?.length, selectedRoute, session, message]);
 
   return (
     <Navbar
@@ -102,13 +113,26 @@ function Header() {
       <Container>
         <Navbar.Brand onClick={() => setSelectedRoute("")}>
           <Link href={"/"} passHref legacyBehavior>
-            <Image
-              src={"/assets/cube-svgrepo-com.svg"}
-              className={"pointer-link"}
-              height={50}
-              width={50}
-              alt="block-logo"
-            />
+            <motion.div
+              initial={{ y: 0 }}
+              animate={{ y: [7, 0] }}
+              // exit={{ y: 300, opacity: 0 }}
+              transition={{
+                // type: "spring",
+                duration: 3,
+                damping: 20,
+                repeat: Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              }}
+            >
+              <Image
+                src="/assets/retail.svg"
+                height={100}
+                width={120}
+                alt="retail logo"
+              />
+            </motion.div>
           </Link>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />

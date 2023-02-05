@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+import { GET_TOPPINGS } from "@/helpers/queries/toppings";
+import { useLazyQuery } from "@apollo/client/react";
+import React, { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 
 const ChefPage = () => {
@@ -18,75 +20,35 @@ const ChefPage = () => {
 
   const [existingPizzas, setExistingPizzas] = useState(dummyPizas);
   const [chefView, setChefView] = useState("Existing");
-  const dummyToppings = [
-    { name: "Shredded Cheese", quantity: 20 },
-    { name: "Pepperoni", quantity: 10 },
-  ];
 
-  const [toppingsList, setToppingsList] = useState(dummyToppings);
   const [toppingInput, setToppingInput] = useState("");
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [selectedTopping, setSelectedTopping] = useState("");
   const [currentPizza, setCurrentPizza] = useState([]);
   const [editSelect, setEditSelect] = useState();
 
+  const [toppingsList, setToppingsList] = useState([]);
+
+  const [getToppings, { data, loading, error, refetch, fetchMore }] =
+    useLazyQuery(GET_TOPPINGS, {
+      fetchPolicy: "cache-and-network",
+    });
+
+  useEffect(() => {
+    getToppings();
+  }, []);
+
+  useEffect(() => {
+    if (data?.getCurrentToppings) {
+      setToppingsList(data.getCurrentToppings);
+    }
+  }, [data]);
+
   const handleToppingQuantity = (e) => {
     let value = parseInt(e.target.value);
 
     setToppingQuantity(value);
   };
-
-  const AvailableToppings = useMemo(() => {
-    if (!toppingsList.length) return [];
-
-    return toppingsList.map((topping) => {
-      return (
-        <div key={topping.name}>
-          <span>Topping: {topping.name}</span>
-          {/* <span>Quantity: {topping.quantity}</span> */}
-
-          <label htmlFor="quantity">Quantity Avail</label>
-          <input
-            type="number"
-            min={0}
-            max={topping.quantity}
-            name="quantity"
-            defaultValue={0}
-            onChange={handleToppingQuantity}
-          />
-          <button onClick={(e) => addIngredientToPizzaList(topping)}>
-            Add
-          </button>
-        </div>
-      );
-    });
-  }, [toppingsList, toppingQuantity]);
-
-  const CurrentPizzaIngredients = useMemo(() => {
-    if (!currentPizza.length) return [];
-
-    return currentPizza.map((topping) => {
-      return (
-        <div key={topping.name}>
-          <span>Topping: {topping.name}</span>
-
-          <label htmlFor="quantity">Quantity Avail</label>
-          <input
-            type="number"
-            min={0}
-            max={10}
-            name="quantity"
-            defaultValue={topping.quantity}
-            onChange={handleToppingQuantity}
-            disabled
-          />
-          <button onClick={(e) => addIngredientToPizzaList(topping)}>
-            Add
-          </button>
-        </div>
-      );
-    });
-  }, [currentPizza, toppingQuantity]);
 
   const addIngredientToPizzaList = (topping) => {
     console.log(
@@ -100,24 +62,76 @@ const ChefPage = () => {
     ]);
   };
 
+  const AvailableToppings = useMemo(() => {
+    if (!toppingsList.length) return [];
+
+    return toppingsList.map((topping) => {
+      return (
+        <div key={topping.name}>
+          <span>Topping: {topping.name}</span>
+
+          <label htmlFor="quantity">Quantity Avail</label>
+          <input
+            type="number"
+            min={0}
+            max={topping.quantity}
+            name="quantity"
+            defaultValue={topping.quantity}
+            disabled
+          />
+
+          <button onClick={(e) => addIngredientToPizzaList(topping)}>+</button>
+        </div>
+      );
+    });
+  }, [toppingsList, toppingQuantity]);
+
+  const CurrentPizzaIngredients = useMemo(() => {
+    if (!currentPizza.length) return [];
+
+    return currentPizza.map((topping) => {
+      return (
+        <div key={topping.name}>
+          <span>Topping: {topping.name}</span>
+
+          <label htmlFor="quantity">quantity</label>
+
+          <button onClick={(e) => addIngredientToPizzaList(topping)}>-</button>
+          {/* <input
+            type="number"
+            min={0}
+            max={10}
+            name="quantity"
+            defaultValue={topping.quantity}
+            onChange={handleToppingQuantity}
+            disabled
+          /> */}
+          <span>{topping.quantity}</span>
+        </div>
+      );
+    });
+  }, [currentPizza, toppingQuantity]);
+
   const ExistingPizzas = useMemo(() => {
     if (!existingPizzas.length) return [];
 
     return existingPizzas.map((pizza) => {
       return (
-        <div key={pizza.name}>
+        <PizzaRow key={pizza.name}>
           <span>Pizza: {pizza.name}</span>
 
-          {pizza.ingredients.map((topping) => {
-            return (
-              <span>
-                Ingredient: {topping.name} - (x{topping.quantity})
-              </span>
-            );
-          })}
+          <div className="ingredient-column">
+            {pizza.ingredients.map((topping) => {
+              return (
+                <span>
+                  {topping.name} - (x{topping.quantity})
+                </span>
+              );
+            })}
+          </div>
 
           <button>Edit</button>
-        </div>
+        </PizzaRow>
       );
     });
   }, [existingPizzas]);
@@ -126,35 +140,61 @@ const ChefPage = () => {
     <PageContain>
       Chef Page
       {chefView === "Existing" && (
-        <div>
+        <>
           {ExistingPizzas}
 
           <button onClick={(e) => setChefView("Create")}>
             Make a new Pizza
           </button>
-        </div>
+        </>
       )}
       {chefView === "Create" && (
-        <ListsContainer>
-          <div>
-            <h4>Adding Ingredients</h4>
-            {AvailableToppings}
-          </div>
+        <>
+          <button onClick={(e) => setChefView("Existing")}>
+            See Existing Pizzas
+          </button>
+          <ListsContainer>
+            <div>
+              <h4>Adding Ingredients</h4>
+              {AvailableToppings}
+            </div>
 
-          <div>
-            <h4>Current Pizza</h4>
+            <div>
+              <h4>Current Pizza</h4>
 
-            {CurrentPizzaIngredients}
-          </div>
-        </ListsContainer>
+              {CurrentPizzaIngredients}
+            </div>
+          </ListsContainer>
+        </>
       )}
     </PageContain>
   );
 };
 
+const PizzaRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  border: 2px solid black;
+  width: 100%;
+  max-width: 50rem;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  align-items: center;
+
+  .ingredient-column {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding: 0 1rem;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+  }
+`;
+
 const ListsContainer = styled.div`
   display: flex;
   flex-direction: row;
+  gap: 2rem;
 `;
 
 const PageContain = styled.div`
