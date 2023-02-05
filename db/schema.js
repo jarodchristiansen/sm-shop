@@ -44,6 +44,8 @@ const typeDefs = gql`
   }
 
   type Mutation {
+    removeTopping(name: String): Topping
+    addTopping(name: String, quantity: Float): Topping
     updateUsername(input: UsernameInput): User
   }
 `;
