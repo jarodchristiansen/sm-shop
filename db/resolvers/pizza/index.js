@@ -23,6 +23,24 @@ export const PizzaResolver = {
     createPizza: async (_, { input }) => {
       try {
         console.log({ input }, "IN CREATE PIZZA");
+        let pizza = await Pizzas.findOne({ name: input.name });
+
+        if (pizza) {
+          pizza.name = input.name;
+          pizza.ingredients = input.ingredients;
+
+          pizza.ingredients = pizza.ingredients.filter(
+            (ingredient) => ingredient.quantity > 0
+          );
+
+          pizza.save();
+
+          return pizza;
+        } else {
+          let newPizza = new Pizzas(input);
+          newPizza.save();
+          return newPizza;
+        }
       } catch (err) {
         console.log({ err }, "IN CREATE PIZZA");
       }

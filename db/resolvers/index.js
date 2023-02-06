@@ -16,6 +16,7 @@ const resolvers = {
     // products
     ...UserResolver.mutations,
     ...ToppingsResolver.mutations,
+    ...PizzaResolver.mutations,
   },
 };
 

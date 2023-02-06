@@ -238,14 +238,14 @@ const ChefPage = () => {
   }, [existingPizzas]);
 
   const handleSubmitPizza = () => {
-    console.log({ toppingsList, currentPizza });
-
     let newToppingsList = toppingsList.map((topping) => {
       return { name: topping.name, quantity: topping.quantity };
     });
 
-    let pizzaCopy = { ...currentPizza };
-    pizzaCopy.ingredients = pizzaCopy.ingredients.map((ingredient) => {
+    let pizzaCopy = { name: "", ingredients: [] };
+    pizzaCopy.name = currentPizza.name;
+
+    pizzaCopy.ingredients = currentPizza.ingredients.map((ingredient) => {
       return { name: ingredient.name, quantity: ingredient.quantity };
     });
 
