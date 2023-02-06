@@ -11,14 +11,6 @@ export const PizzaResolver = {
         return err;
       }
     },
-    // getCurrentToppings: async (_, {}) => {
-    //   try {
-    //     let toppings = await Toppings.find({});
-    //     return toppings;
-    //   } catch (err) {
-    //     return err;
-    //   }
-    // },
   },
   mutations: {
     createPizza: async (_, { input }) => {
@@ -49,8 +41,6 @@ export const PizzaResolver = {
     deletePizza: async (_, { input }) => {
       try {
         for (let topping of input.ingredients) {
-          console.log("IN DELETE PIZZA", { topping });
-
           let existingTopping = await Toppings.findOne({ name: topping.name });
 
           if (existingTopping) {
@@ -59,9 +49,6 @@ export const PizzaResolver = {
 
             await existingTopping.save();
           }
-
-          // let updatedTopping = new Toppings(topping);
-          // let result = await updatedTopping.save();
         }
 
         let result = await Pizzas.findOne({ name: input.name }).remove();
@@ -71,29 +58,5 @@ export const PizzaResolver = {
         console.log({ err });
       }
     },
-    // addTopping: async (_, { name, quantity }) => {
-    //   try {
-    //     let existingTopping = await Toppings.findOne({ name });
-    //     if (existingTopping) {
-    //       existingTopping.quantity = quantity;
-    //       await existingTopping.save();
-    //       return existingTopping;
-    //     } else {
-    //       let newTopping = new Toppings({ name, quantity });
-    //       let result = await newTopping.save();
-    //       return result;
-    //     }
-    //   } catch (err) {
-    //     console.log({ err });
-    //   }
-    // },
-    // removeTopping: async (_, { name }) => {
-    //   try {
-    //     let toppingsList = await Toppings.findOne({ name }).remove();
-    //     return toppingsList;
-    //   } catch (err) {
-    //     console.log({ err }, "IN REMOVE TOPPING");
-    //   }
-    // },
   },
 };

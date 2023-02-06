@@ -75,8 +75,6 @@ const ChefPage = () => {
   }, [pizzaData]);
 
   const handleToppingQuantity = (inputTopping, step) => {
-    console.log({ toppingsList, inputTopping }, "IN HANDLE TOPPING QUANTITY");
-
     let copyAvailToppings = [...toppingsList];
 
     let filteredList = copyAvailToppings.filter(
@@ -84,8 +82,6 @@ const ChefPage = () => {
     );
 
     if (filteredList.length) {
-      console.log({ toppingsList, copyAvailToppings });
-
       copyAvailToppings = copyAvailToppings.map((ingredient) => {
         let copyIngredient = { ...ingredient };
 
@@ -94,8 +90,6 @@ const ChefPage = () => {
           step === "increment"
             ? copyIngredient.quantity--
             : copyIngredient.quantity++;
-
-          console.log({ copyIngredient });
         }
 
         return copyIngredient;
@@ -154,8 +148,6 @@ const ChefPage = () => {
   };
 
   const AvailableToppings = useMemo(() => {
-    console.log({ toppingsList }, "IN AVAILABLE TOPPINGS");
-
     if (!toppingsList.length) return [];
 
     return toppingsList.map((topping) => {
@@ -285,8 +277,6 @@ const ChefPage = () => {
   };
 
   const handleDeletePizza = async () => {
-    console.log({ currentPizza }, "IN HANDLE DELETE PIZZA");
-
     let pizzaCopy = { name: "", ingredients: [] };
     pizzaCopy.name = currentPizza.name;
 

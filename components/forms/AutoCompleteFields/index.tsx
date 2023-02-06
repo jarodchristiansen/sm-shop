@@ -53,8 +53,6 @@ const AutoCompleteFields = ({ setAirport, label }: any) => {
     if (!suggestedOptions.length) return [];
 
     return suggestedOptions.map((item: any, idx) => {
-      console.log({ item }, "In dropdown");
-
       //TODO: Resolve using idx, but maintains order
       return (
         <option

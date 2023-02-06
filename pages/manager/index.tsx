@@ -199,7 +199,7 @@ const ManagerPage = () => {
             type="text"
             name="topping_name"
             value={toppingInput}
-            onChange={() => console.log({ toppingInput })}
+            onChange={(e) => console.log({ toppingInput })}
           />
 
           <label htmlFor="quantity">Quantity Avail</label>
