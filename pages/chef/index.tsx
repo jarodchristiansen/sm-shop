@@ -1,8 +1,9 @@
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
-import { useLazyQuery } from "@apollo/client/react";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 import React, { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
+import { UPDATE_TOPPINGS } from "@/helpers/mutations/toppings";
 
 const ChefPage = () => {
   const [existingPizzas, setExistingPizzas] = useState([]);
@@ -29,6 +30,11 @@ const ChefPage = () => {
   ] = useLazyQuery(GET_EXISTING_PIZZAS, {
     fetchPolicy: "cache-and-network",
   });
+
+  const [
+    updateToppings,
+    { loading: updateToppingsLoading, error: updateToppingsError },
+  ] = useMutation(UPDATE_TOPPINGS);
 
   useEffect(() => {
     getToppings();
@@ -227,6 +233,12 @@ const ChefPage = () => {
 
   const handleSubmitPizza = () => {
     console.log({ toppingsList, currentPizza });
+
+    let newToppingsList = toppingsList.map((topping) => {
+      return { name: topping.name, quantity: topping.quantity };
+    });
+
+    updateToppings({ variables: { input: newToppingsList } });
   };
 
   return (

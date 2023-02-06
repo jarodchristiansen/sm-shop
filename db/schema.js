@@ -49,7 +49,13 @@ const typeDefs = gql`
     getUser(email: String, id: String): User
   }
 
+  input ToppingsInput {
+    name: String
+    quantity: Float
+  }
+
   type Mutation {
+    updateToppings(input: [ToppingsInput]): [Topping]
     removeTopping(name: String): Topping
     addTopping(name: String, quantity: Float): Topping
     updateUsername(input: UsernameInput): User

@@ -16,3 +16,12 @@ export const ADD_TOPPING = gql`
     }
   }
 `;
+
+export const UPDATE_TOPPINGS = gql`
+  mutation updateToppings($input: [ToppingsInput]) {
+    updateToppings(input: $input) {
+      name
+      quantity
+    }
+  }
+`;
