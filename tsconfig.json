@@ -28,8 +28,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "helpers/queries/collective/index.js", "pages/api/favoritesManager.js", "pages/assets/index.test.jsx"  ],
+    "**/*.tsx"],
   "exclude": [
     "node_modules"
   ]
