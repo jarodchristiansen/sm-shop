@@ -11,7 +11,7 @@ const ChefPage = () => {
   const [toppingInput, setToppingInput] = useState("");
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [selectedTopping, setSelectedTopping] = useState("");
-  const [currentPizza, setCurrentPizza] = useState([]);
+  const [currentPizza, setCurrentPizza] = useState<any>([]);
 
   const [editSelectPizza, setEditSelectPizza] = useState<any>();
 
@@ -60,7 +60,7 @@ const ChefPage = () => {
 
   const addIngredientToPizzaList = (topping) => {
     console.log(
-      { topping, toppingQuantity },
+      { topping, toppingQuantity, currentPizza },
       "IN ADD INGREDIENT TO PIZZA LIST"
     );
 
@@ -95,9 +95,9 @@ const ChefPage = () => {
   }, [toppingsList, toppingQuantity]);
 
   const CurrentPizzaIngredients = useMemo(() => {
-    if (!currentPizza.length) return [];
+    if (!currentPizza?.ingredients?.length) return [];
 
-    return currentPizza.map((topping) => {
+    return currentPizza.ingredients.map((topping) => {
       return (
         <div key={topping.name}>
           <span>Topping: {topping.name}</span>
@@ -140,7 +140,14 @@ const ChefPage = () => {
             })}
           </div>
 
-          <button onClick={(e) => setEditSelectPizza(pizza)}>Edit</button>
+          <button
+            onClick={(e) => {
+              setCurrentPizza(pizza);
+              setChefView("Create");
+            }}
+          >
+            Edit
+          </button>
         </PizzaRow>
       );
     });
@@ -161,24 +168,72 @@ const ChefPage = () => {
       {chefView === "Existing" && !!editSelectPizza && (
         // TODO: Add button to deselect/save changes to existing pizza
         <div>
-          <span>Customer: {editSelectPizza.name}</span>
-          {editSelectPizza.ingredients.map((ingredient: any) => {
-            return (
-              <div>
-                {/* TODO: make Inputs  */}
-                <span>Ingredient Name: {ingredient?.name}</span>
-                <span> (x{ingredient?.quantity})</span>
-              </div>
-            );
-          })}
-          {/* <span>Customer: {editSelectPizza.name}</span> */}
+          <div>{AvailableToppings}</div>
+
+          <div>
+            <span>Customer: {editSelectPizza.name}</span>
+            {editSelectPizza.ingredients.map((ingredient: any) => {
+              // TODO: Move this into helper function
+              // filters to verify can't add ingredients beyond capacity
+
+              let filteredIngredient = toppingsList.filter(
+                (topping) => topping.name === ingredient.name
+              );
+              let maxCount;
+
+              if (filteredIngredient.length) {
+                maxCount = filteredIngredient[0].quantity;
+              } else {
+                maxCount = ingredient.quantity;
+              }
+
+              return (
+                <div>
+                  <label htmlFor="name">Ingredient Name:</label>
+                  <input
+                    type="text"
+                    name="name"
+                    defaultValue={ingredient?.name}
+                  />
+
+                  <label htmlFor="quantity">Quantity:</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={maxCount}
+                    name="quantity"
+                    defaultValue={ingredient.quantity}
+                  />
+
+                  {/* <span> (x{ingredient?.quantity})</span> */}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
       {chefView === "Create" && (
         <>
-          <button onClick={(e) => setChefView("Existing")}>
+          <button
+            onClick={(e) => {
+              setCurrentPizza([]);
+              setChefView("Existing");
+            }}
+          >
             See Existing Pizzas
           </button>
+
+          {
+            <div>
+              <label htmlFor="order_name">Order Name:</label>
+              <input
+                type="text"
+                name="order_name"
+                defaultValue={currentPizza?.name}
+              />
+            </div>
+          }
+
           <ListsContainer>
             <div>
               <h4>Adding Ingredients</h4>
@@ -196,6 +251,8 @@ const ChefPage = () => {
     </PageContain>
   );
 };
+
+const EditPizzaContainer = styled.div``;
 
 const PizzaRow = styled.div`
   display: flex;
