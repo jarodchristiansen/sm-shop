@@ -165,53 +165,6 @@ const ChefPage = () => {
           </button>
         </>
       )}
-      {chefView === "Existing" && !!editSelectPizza && (
-        // TODO: Add button to deselect/save changes to existing pizza
-        <div>
-          <div>{AvailableToppings}</div>
-
-          <div>
-            <span>Customer: {editSelectPizza.name}</span>
-            {editSelectPizza.ingredients.map((ingredient: any) => {
-              // TODO: Move this into helper function
-              // filters to verify can't add ingredients beyond capacity
-
-              let filteredIngredient = toppingsList.filter(
-                (topping) => topping.name === ingredient.name
-              );
-              let maxCount;
-
-              if (filteredIngredient.length) {
-                maxCount = filteredIngredient[0].quantity;
-              } else {
-                maxCount = ingredient.quantity;
-              }
-
-              return (
-                <div>
-                  <label htmlFor="name">Ingredient Name:</label>
-                  <input
-                    type="text"
-                    name="name"
-                    defaultValue={ingredient?.name}
-                  />
-
-                  <label htmlFor="quantity">Quantity:</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={maxCount}
-                    name="quantity"
-                    defaultValue={ingredient.quantity}
-                  />
-
-                  {/* <span> (x{ingredient?.quantity})</span> */}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
       {chefView === "Create" && (
         <>
           <button
