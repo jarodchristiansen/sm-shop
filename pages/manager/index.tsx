@@ -4,7 +4,7 @@ import { GET_TOPPINGS } from "@/helpers/queries/toppings";
 import { ADD_TOPPING, REMOVE_TOPPING } from "@/helpers/mutations/toppings";
 import { useLazyQuery, useMutation } from "@apollo/client";
 
-import { Message_data } from "../../contexts/role";
+import { Role_data } from "../../contexts/role";
 import { useRouter } from "next/router";
 
 const ManagerPage = () => {
@@ -13,7 +13,7 @@ const ManagerPage = () => {
   const [toppingQuantity, setToppingQuantity] = useState<string | number>("");
   const [selectedTopping, setSelectedTopping] = useState("");
 
-  const { message, setMessage } = useContext(Message_data);
+  const { role, setRole } = useContext(Role_data);
 
   const router = useRouter();
 

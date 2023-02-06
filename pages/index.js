@@ -3,13 +3,13 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import styled from "styled-components";
 import Image from "next/image";
-import { Message_data } from "../contexts/role";
+import { Role_data } from "../contexts/role";
 import { useContext, useEffect } from "react";
 import { useRouter } from "next/router";
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const { message, setMessage } = useContext(Message_data);
+  const { role, setRole } = useContext(Role_data);
 
   return (
     <AlternateHomePageWrapper>
@@ -21,7 +21,7 @@ export default function Home() {
           </h4>
 
           <div className="card-container">
-            <div onClick={(e) => setMessage("Manager")} className="role-card">
+            <div onClick={(e) => setRole("Manager")} className="role-card">
               <h5>Manager</h5>
 
               <Image
@@ -31,10 +31,10 @@ export default function Home() {
                 alt="chef"
               />
 
-              {message === "Manager" && <div className="selected-div" />}
+              {role === "Manager" && <div className="selected-div" />}
             </div>
 
-            <div onClick={(e) => setMessage("Chef")} className="role-card">
+            <div onClick={(e) => setRole("Chef")} className="role-card">
               <h5>Chef</h5>
 
               <Image
@@ -44,7 +44,7 @@ export default function Home() {
                 alt="chef"
               />
 
-              {message === "Chef" && <div className="selected-div" />}
+              {role === "Chef" && <div className="selected-div" />}
             </div>
           </div>
         </div>
