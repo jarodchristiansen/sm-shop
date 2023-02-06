@@ -41,5 +41,23 @@ export const ToppingsResolver = {
         console.log({ err }, "IN REMOVE TOPPING");
       }
     },
+
+    updateToppings: async (_, { input }) => {
+      try {
+        for (let topping of input) {
+          let existingTopping = await Toppings.findOneAndUpdate(
+            { name: topping.name },
+            { quantity: topping.quantity }
+          );
+          let result = await existingTopping.save();
+          // let updatedTopping = new Toppings(topping);
+          // let result = await updatedTopping.save();
+        }
+
+        return input;
+      } catch (err) {
+        console.log({ err }, "IN UPDATE TOPPINGS");
+      }
+    },
   },
 };

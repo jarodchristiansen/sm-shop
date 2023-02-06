@@ -1,16 +1,22 @@
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
-import { useLazyQuery } from "@apollo/client/react";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 import React, { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
+import { UPDATE_TOPPINGS } from "@/helpers/mutations/toppings";
+import { CREATE_PIZZA, DELETE_PIZZA } from "@/helpers/mutations/pizzas";
 
 const ChefPage = () => {
   const [existingPizzas, setExistingPizzas] = useState([]);
   const [chefView, setChefView] = useState("Existing");
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [currentPizza, setCurrentPizza] = useState<any>([]);
-  const [editSelectPizza, setEditSelectPizza] = useState<any>();
+  const [initializedPizza, setInitializedPizza] = useState<any>({});
+
   const [toppingsList, setToppingsList] = useState([]);
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery(GET_TOPPINGS, {
@@ -30,6 +36,27 @@ const ChefPage = () => {
     fetchPolicy: "cache-and-network",
   });
 
+  const [
+    updateToppings,
+    { loading: updateToppingsLoading, error: updateToppingsError },
+  ] = useMutation(UPDATE_TOPPINGS, {
+    refetchQueries: [{ query: GET_EXISTING_PIZZAS }, { query: GET_TOPPINGS }],
+  });
+
+  const [
+    createPizza,
+    { loading: createPizzaLoading, error: createPizzaError },
+  ] = useMutation(CREATE_PIZZA, {
+    refetchQueries: [{ query: GET_EXISTING_PIZZAS }, { query: GET_TOPPINGS }],
+  });
+
+  const [
+    deletePizza,
+    { loading: deletePizzaLoading, error: deletePizzaError },
+  ] = useMutation(DELETE_PIZZA, {
+    refetchQueries: [{ query: GET_EXISTING_PIZZAS }, { query: GET_TOPPINGS }],
+  });
+
   useEffect(() => {
     getToppings();
     getExistingPizzas();
@@ -47,7 +74,7 @@ const ChefPage = () => {
     }
   }, [pizzaData]);
 
-  const handleToppingQuantity = (inputTopping) => {
+  const handleToppingQuantity = (inputTopping, step) => {
     console.log({ toppingsList, inputTopping }, "IN HANDLE TOPPING QUANTITY");
 
     let copyAvailToppings = [...toppingsList];
@@ -63,7 +90,10 @@ const ChefPage = () => {
         let copyIngredient = { ...ingredient };
 
         if (ingredient.name === inputTopping.name) {
-          copyIngredient.quantity--;
+          // TODO: Make this more intuitive due to inversion
+          step === "increment"
+            ? copyIngredient.quantity--
+            : copyIngredient.quantity++;
 
           console.log({ copyIngredient });
         }
@@ -72,11 +102,6 @@ const ChefPage = () => {
       });
     }
 
-    console.log(
-      { copyAvailToppings, toppingsList },
-      "IN HANDLE TOPPING QUANTITY"
-    );
-
     setToppingsList(copyAvailToppings);
 
     // TODO: Decrement from the available toppings;
@@ -84,7 +109,7 @@ const ChefPage = () => {
     // setToppingQuantity(value);
   };
 
-  const addIngredientToPizzaList = (topping) => {
+  const updateIngredientOnCurrentPizza = (topping, step) => {
     if (currentPizza && currentPizza?.ingredients) {
       let copyPizza = { ...currentPizza };
 
@@ -94,11 +119,14 @@ const ChefPage = () => {
 
       if (filteredIngredient.length) {
         // If ingredient already exists
+        // TODO: ADD number boundaries min/max on adjustments
         copyPizza.ingredients = copyPizza.ingredients.map((ingredient) => {
           let copyIngredient = { ...ingredient };
 
           if (ingredient.name === topping.name) {
-            copyIngredient.quantity++;
+            step === "increment"
+              ? copyIngredient.quantity++
+              : copyIngredient.quantity--;
           }
 
           return copyIngredient;
@@ -119,7 +147,7 @@ const ChefPage = () => {
     } else {
       // In create new pizza case
       setCurrentPizza({
-        name: "",
+        name: currentPizza?.name,
         ingredients: [{ name: topping.name, quantity: 1 }],
       });
     }
@@ -148,8 +176,8 @@ const ChefPage = () => {
 
           <button
             onClick={(e) => {
-              addIngredientToPizzaList(topping);
-              handleToppingQuantity(topping);
+              updateIngredientOnCurrentPizza(topping, "increment");
+              handleToppingQuantity(topping, "increment");
             }}
             disabled={topping.quantity === 0}
           >
@@ -164,17 +192,27 @@ const ChefPage = () => {
     if (!currentPizza?.ingredients?.length) return [];
 
     return currentPizza.ingredients.map((topping) => {
-      return (
-        <div key={topping.name}>
-          <span>Topping: {topping.name}</span>
+      if (topping.quantity) {
+        return (
+          <div key={topping.name}>
+            <span>Topping: {topping.name}</span>
 
-          <label htmlFor="quantity">quantity</label>
+            <label htmlFor="quantity">quantity</label>
 
-          <button onClick={(e) => addIngredientToPizzaList(topping)}>-</button>
+            <button
+              onClick={(e) => {
+                updateIngredientOnCurrentPizza(topping, "decrement");
+                handleToppingQuantity(topping, "decrement");
+              }}
+              disabled={topping.quantity === 0}
+            >
+              -
+            </button>
 
-          <span>{topping.quantity}</span>
-        </div>
-      );
+            <span>{topping.quantity}</span>
+          </div>
+        );
+      }
     });
   }, [currentPizza, toppingQuantity, toppingsList]);
 
@@ -198,6 +236,7 @@ const ChefPage = () => {
 
           <button
             onClick={(e) => {
+              setInitializedPizza(pizza);
               setCurrentPizza(pizza);
               setChefView("Create");
             }}
@@ -209,24 +248,81 @@ const ChefPage = () => {
     });
   }, [existingPizzas]);
 
-  console.log({ currentPizza });
+  const handleSubmitPizza = () => {
+    let newToppingsList = toppingsList.map((topping) => {
+      return { name: topping.name, quantity: topping.quantity };
+    });
+
+    let pizzaCopy = { name: "", ingredients: [] };
+    pizzaCopy.name = currentPizza.name;
+
+    pizzaCopy.ingredients = currentPizza.ingredients.map((ingredient) => {
+      return { name: ingredient.name, quantity: ingredient.quantity };
+    });
+
+    let nonExistingIngredients = pizzaCopy.ingredients.filter(
+      (ingredient) => ingredient.quantity < 1
+    );
+
+    if (!pizzaCopy?.name) {
+      setErrorMessage("NO CUSTOMER NAME CREATED");
+
+      return;
+    } else if (nonExistingIngredients.length === pizzaCopy.ingredients.length) {
+      setErrorMessage(
+        "ATTEMPTING TO SAVE PIZZA WITHOUT INGREDIENTS, PLEASE DELETE INSTEAD"
+      );
+
+      updateToppings({ variables: { input: newToppingsList } });
+
+      return;
+    } else {
+      updateToppings({ variables: { input: newToppingsList } });
+      createPizza({ variables: { input: pizzaCopy } });
+      setChefView("Existing");
+      setErrorMessage("");
+    }
+  };
+
+  const handleDeletePizza = async () => {
+    console.log({ currentPizza }, "IN HANDLE DELETE PIZZA");
+
+    let pizzaCopy = { name: "", ingredients: [] };
+    pizzaCopy.name = currentPizza.name;
+
+    pizzaCopy.ingredients = currentPizza.ingredients?.map((ingredient) => {
+      return { name: ingredient.name, quantity: ingredient.quantity };
+    });
+
+    await deletePizza({ variables: { input: pizzaCopy } });
+    setChefView("Existing");
+    setErrorMessage("");
+  };
 
   return (
     <PageContain>
       Chef Page
-      {chefView === "Existing" && !editSelectPizza && (
+      {chefView === "Existing" && (
         <>
           {ExistingPizzas}
 
-          <button onClick={(e) => setChefView("Create")}>
+          <button
+            onClick={(e) => {
+              setCurrentPizza([]);
+              setInitializedPizza([]);
+              setChefView("Create");
+              setErrorMessage("");
+            }}
+          >
             Make a new Pizza
           </button>
         </>
       )}
       {chefView === "Create" && (
-        <>
+        <CreateContainer>
           <button
             onClick={(e) => {
+              setErrorMessage("");
               setCurrentPizza([]);
               setChefView("Existing");
             }}
@@ -239,29 +335,50 @@ const ChefPage = () => {
             <input
               type="text"
               name="customer_name"
-              defaultValue={currentPizza?.name}
+              defaultValue={initializedPizza?.name}
+              onChange={(e) => {
+                setCurrentPizza({
+                  name: e.target.value,
+                  ingredients: currentPizza.ingredients,
+                });
+              }}
+              disabled={!!initializedPizza?.name}
             />
           </div>
 
           <ListsContainer>
-            <div>
+            <div className="available-toppings-table">
               <h4>Adding Ingredients</h4>
               {AvailableToppings}
             </div>
 
-            <div>
+            <div className="current-pizza-table">
               <h4>Current Pizza</h4>
 
               {CurrentPizzaIngredients}
             </div>
           </ListsContainer>
-        </>
+
+          <div>
+            <h4>{errorMessage}</h4>
+          </div>
+
+          <div>
+            <button onClick={handleDeletePizza}>Delete</button>
+            <button onClick={handleSubmitPizza}>Save</button>
+          </div>
+        </CreateContainer>
       )}
     </PageContain>
   );
 };
 
-const EditPizzaContainer = styled.div``;
+const CreateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  align-items: center;
+`;
 
 const PizzaRow = styled.div`
   display: flex;
@@ -287,6 +404,24 @@ const ListsContainer = styled.div`
   display: flex;
   flex-direction: row;
   gap: 2rem;
+
+  .available-toppings-table {
+    border: 2px solid black;
+    padding: 2rem;
+
+    div {
+      border-top: 1px solid gray;
+    }
+  }
+
+  .current-pizza-table {
+    border: 2px solid black;
+    padding: 2rem;
+
+    div {
+      border-top: 1px solid gray;
+    }
+  }
 `;
 
 const PageContain = styled.div`
