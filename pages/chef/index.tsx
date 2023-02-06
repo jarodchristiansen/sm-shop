@@ -7,14 +7,9 @@ import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 const ChefPage = () => {
   const [existingPizzas, setExistingPizzas] = useState([]);
   const [chefView, setChefView] = useState("Existing");
-
-  const [toppingInput, setToppingInput] = useState("");
   const [toppingQuantity, setToppingQuantity] = useState(0);
-  const [selectedTopping, setSelectedTopping] = useState("");
   const [currentPizza, setCurrentPizza] = useState<any>([]);
-
   const [editSelectPizza, setEditSelectPizza] = useState<any>();
-
   const [toppingsList, setToppingsList] = useState([]);
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
@@ -189,7 +184,7 @@ const ChefPage = () => {
     return existingPizzas.map((pizza) => {
       return (
         <PizzaRow key={pizza.name}>
-          <span>Pizza: {pizza.name}</span>
+          <span>Customer: {pizza.name}</span>
 
           <div className="ingredient-column">
             {pizza?.ingredients.map((topping) => {
@@ -240,10 +235,10 @@ const ChefPage = () => {
           </button>
 
           <div>
-            <label htmlFor="order_name">Order Name:</label>
+            <label htmlFor="customer_name">Customer:</label>
             <input
               type="text"
-              name="order_name"
+              name="customer_name"
               defaultValue={currentPizza?.name}
             />
           </div>
