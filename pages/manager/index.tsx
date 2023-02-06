@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
   const [toppingInput, setToppingInput] = useState("");
-  const [toppingQuantity, setToppingQuantity] = useState(0);
+  const [toppingQuantity, setToppingQuantity] = useState<string | number>("");
   const [selectedTopping, setSelectedTopping] = useState("");
 
   const { message, setMessage } = useContext(Message_data);
@@ -54,56 +54,6 @@ const ManagerPage = () => {
     }
   }, [data]);
 
-  const ToppingsItems = useMemo(() => {
-    if (!toppingsList.length) return [];
-
-    return toppingsList.map((topping) => {
-      return (
-        <div key={topping.name}>
-          {topping.name !== selectedTopping ? (
-            <div className="standard-row">
-              <span>Topping: {topping.name}</span>
-              <span>Quantity: {topping.quantity}</span>
-              <button onClick={(e) => handleEditField(topping)}>Edit</button>
-            </div>
-          ) : (
-            <div className="selected-topping-row">
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleRemoveIngredient(topping);
-                }}
-              >
-                X
-              </button>
-              <div>
-                <label htmlFor="topping_name">Topping Name</label>
-                <input
-                  type="text"
-                  name="topping_name"
-                  defaultValue={topping.name}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="quantity">Quantity Avail</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={100}
-                  name="quantity"
-                  defaultValue={topping.quantity}
-                />
-              </div>
-
-              <button type="submit">Submit</button>
-            </div>
-          )}
-        </div>
-      );
-    });
-  }, [toppingsList, selectedTopping]);
-
   const handleFormChange = (e) => {
     e.preventDefault();
     let name = e.target.name;
@@ -114,7 +64,12 @@ const ManagerPage = () => {
         setToppingInput(value);
         break;
       case "quantity":
-        setToppingQuantity(parseInt(value));
+        if (value) {
+          setToppingQuantity(parseInt(value));
+        } else {
+          setToppingQuantity("");
+        }
+
         break;
       default:
         break;
@@ -124,7 +79,6 @@ const ManagerPage = () => {
   const handleFormSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("IN HANDLE SUBMIT FORM", { e });
     let filtered = toppingsList.filter(
       (topping) => topping.name === toppingInput
     ).length;
@@ -150,8 +104,7 @@ const ManagerPage = () => {
       });
     }
 
-    // CLOSES OUT EDIT MODE OF FIELD
-    setSelectedTopping("");
+    handleClearFields();
   };
 
   const handleEditField = (topping) => {
@@ -161,15 +114,81 @@ const ManagerPage = () => {
     setSelectedTopping(topping.name);
   };
 
-  const handleRemoveIngredient = (e: any) => {
-    let name = e.name;
+  const handleRemoveIngredient = (e, topping: any) => {
+    e.preventDefault();
+    let name = topping.name;
 
     removeTopping({ variables: { name } });
-
-    // let newList = toppingsList.filter((topping) => topping.name !== name);
-
-    // setToppingsList(newList);
+    handleClearFields();
   };
+
+  const handleClearFields = () => {
+    setToppingInput("");
+    setToppingQuantity("");
+    setSelectedTopping("");
+  };
+
+  const submitDisabled = useMemo(() => {
+    if (!toppingInput || !toppingQuantity) {
+      return true;
+    } else if (toppingInput && toppingQuantity) {
+      return false;
+    }
+  }, [toppingInput, toppingQuantity, selectedTopping]);
+
+  const ToppingsItems = useMemo(() => {
+    if (!toppingsList.length) return [];
+
+    return toppingsList.map((topping) => {
+      return (
+        <div key={topping.name}>
+          {topping.name !== selectedTopping ? (
+            <div className="standard-row">
+              <span>Topping: {topping.name}</span>
+              <span>Quantity: {topping.quantity}</span>
+              <button onClick={(e) => handleEditField(topping)}>Edit</button>
+            </div>
+          ) : (
+            <div className="selected-topping-row">
+              <button
+                onClick={(e) => {
+                  handleRemoveIngredient(e, topping);
+                }}
+              >
+                X
+              </button>
+
+              <button onClick={() => handleClearFields()}>Cancel Edit</button>
+
+              <div>
+                <label htmlFor="topping_name">Topping Name</label>
+                <input
+                  type="text"
+                  name="topping_name"
+                  defaultValue={topping.name}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="quantity">Quantity Avail</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  name="quantity"
+                  defaultValue={topping.quantity}
+                />
+              </div>
+
+              <button type="submit" disabled={submitDisabled}>
+                Submit
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    });
+  }, [toppingsList, selectedTopping, submitDisabled]);
 
   return (
     <PageContain>
@@ -178,14 +197,28 @@ const ManagerPage = () => {
       <ToppingsForm onSubmit={handleFormSubmit} onChange={handleFormChange}>
         <div className="input-container">
           <label htmlFor="topping_name">Topping Name</label>
-          <input type="text" name="topping_name" />
+          <input
+            type="text"
+            name="topping_name"
+            value={toppingInput}
+            onChange={() => console.log({ toppingInput })}
+          />
 
           <label htmlFor="quantity">Quantity Avail</label>
-          <input type="number" min={1} max={100} name="quantity" />
+          <input
+            type="number"
+            min={1}
+            max={100}
+            name="quantity"
+            value={toppingQuantity}
+            onChange={() => console.log({ toppingQuantity })}
+          />
         </div>
 
         <div>
-          <button type="submit">Submit</button>
+          <button type="submit" disabled={submitDisabled}>
+            Submit
+          </button>
         </div>
 
         <div className="list-header">
@@ -265,6 +298,10 @@ const PageContain = styled.div`
     background-color: gray;
     color: white;
     font-weight: bold;
+
+    :disabled {
+      cursor: not-allowed;
+    }
   }
 `;
 
