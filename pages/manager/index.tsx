@@ -37,15 +37,13 @@ const ManagerPage = () => {
   });
 
   useEffect(() => {
-    getToppings();
-
-    // // TODO: Move to server side if possible from context
-    // // Will probably require cookies instead of localStorage
-    // if (message && message === "Manager") {
-    //   getToppings();
-    // } else {
-    //   router.push("/");
-    // }
+    // TODO: Move to server side if possible from context
+    // Will probably require cookies instead of localStorage
+    if (role && role === "Manager") {
+      getToppings();
+    } else {
+      router.push("/");
+    }
   }, []);
 
   useEffect(() => {
