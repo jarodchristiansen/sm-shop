@@ -87,13 +87,6 @@ const ChefPage = () => {
     // setToppingQuantity(value);
   };
 
-  // const removeIngredientFromCurrentPizza = (topping) => {
-  //   if (currentPizza && currentPizza?.ingredients) {
-  //     let copyPizza = {...currentPizza};
-
-  //   }
-  // };
-
   const updateIngredientOnCurrentPizza = (topping, step) => {
     if (currentPizza && currentPizza?.ingredients) {
       let copyPizza = { ...currentPizza };
@@ -232,7 +225,9 @@ const ChefPage = () => {
     });
   }, [existingPizzas]);
 
-  console.log({ currentPizza });
+  const handleSubmitPizza = () => {
+    console.log({ toppingsList, currentPizza });
+  };
 
   return (
     <PageContain>
@@ -247,7 +242,7 @@ const ChefPage = () => {
         </>
       )}
       {chefView === "Create" && (
-        <>
+        <CreateContainer>
           <button
             onClick={(e) => {
               setCurrentPizza([]);
@@ -267,24 +262,33 @@ const ChefPage = () => {
           </div>
 
           <ListsContainer>
-            <div>
+            <div className="available-toppings-table">
               <h4>Adding Ingredients</h4>
               {AvailableToppings}
             </div>
 
-            <div>
+            <div className="current-pizza-table">
               <h4>Current Pizza</h4>
 
               {CurrentPizzaIngredients}
             </div>
           </ListsContainer>
-        </>
+
+          <div>
+            <button onClick={handleSubmitPizza}>Save</button>
+          </div>
+        </CreateContainer>
       )}
     </PageContain>
   );
 };
 
-const EditPizzaContainer = styled.div``;
+const CreateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  align-items: center;
+`;
 
 const PizzaRow = styled.div`
   display: flex;
@@ -310,6 +314,24 @@ const ListsContainer = styled.div`
   display: flex;
   flex-direction: row;
   gap: 2rem;
+
+  .available-toppings-table {
+    border: 2px solid black;
+    padding: 2rem;
+
+    div {
+      border-top: 1px solid gray;
+    }
+  }
+
+  .current-pizza-table {
+    border: 2px solid black;
+    padding: 2rem;
+
+    div {
+      border-top: 1px solid gray;
+    }
+  }
 `;
 
 const PageContain = styled.div`
