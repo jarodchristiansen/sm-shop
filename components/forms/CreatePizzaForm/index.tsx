@@ -6,12 +6,19 @@ import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
 import { useEffect, useMemo, useState } from "react";
 
+interface CreatePizzaFormProps {
+  currentPizza: any;
+  setCurrentPizza: (pizza: any) => void;
+  setChefView: (view: string) => void;
+  initializedPizza: any;
+}
+
 const CreatePizzaForm = ({
   currentPizza,
   setCurrentPizza,
   setChefView,
   initializedPizza,
-}: any) => {
+}: CreatePizzaFormProps) => {
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -65,7 +72,6 @@ const CreatePizzaForm = ({
         let copyIngredient = { ...ingredient };
 
         if (ingredient.name === inputTopping.name) {
-          // TODO: Make this more intuitive due to inversion
           step === "increment"
             ? copyIngredient.quantity--
             : copyIngredient.quantity++;
@@ -76,10 +82,6 @@ const CreatePizzaForm = ({
     }
 
     setToppingsList(copyAvailToppings);
-
-    // TODO: Decrement from the available toppings;
-
-    // setToppingQuantity(value);
   };
 
   const handleDeletePizza = async () => {
