@@ -11,8 +11,12 @@ const ChefPage = () => {
   const [chefView, setChefView] = useState("Existing");
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [currentPizza, setCurrentPizza] = useState<any>([]);
+  const [initializedPizza, setInitializedPizza] = useState<any>({});
 
   const [toppingsList, setToppingsList] = useState([]);
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery(GET_TOPPINGS, {
@@ -226,6 +230,7 @@ const ChefPage = () => {
 
           <button
             onClick={(e) => {
+              setInitializedPizza(pizza);
               setCurrentPizza(pizza);
               setChefView("Create");
             }}
@@ -249,8 +254,24 @@ const ChefPage = () => {
       return { name: ingredient.name, quantity: ingredient.quantity };
     });
 
-    updateToppings({ variables: { input: newToppingsList } });
-    createPizza({ variables: { input: pizzaCopy } });
+    if (!pizzaCopy?.name || !pizzaCopy?.ingredients.length) {
+      setErrorMessage("NO CUSTOMER NAME CREATED");
+
+      return;
+    }
+    //  else if (
+    //   existingPizzas.filter((pizza) => pizza.name === pizzaCopy.name).length > 0
+    // ) {
+    //   // TODO:  handle proper cases when updating pizza
+    //   setErrorMessage(
+    //     "CUSTOMER ORDER ALREADY EXISTS PLEASE CHANGE CUSTOMER NAME"
+    //   );
+    //   return;
+    // }
+    else {
+      updateToppings({ variables: { input: newToppingsList } });
+      createPizza({ variables: { input: pizzaCopy } });
+    }
   };
 
   return (
@@ -281,7 +302,14 @@ const ChefPage = () => {
             <input
               type="text"
               name="customer_name"
-              defaultValue={currentPizza?.name}
+              defaultValue={initializedPizza?.name}
+              onChange={(e) => {
+                setCurrentPizza({
+                  name: e.target.value,
+                  ingredients: currentPizza.ingredients,
+                });
+              }}
+              disabled={!!initializedPizza?.name}
             />
           </div>
 
@@ -297,6 +325,10 @@ const ChefPage = () => {
               {CurrentPizzaIngredients}
             </div>
           </ListsContainer>
+
+          <div>
+            <h4>{errorMessage}</h4>
+          </div>
 
           <div>
             <button onClick={handleSubmitPizza}>Save</button>
