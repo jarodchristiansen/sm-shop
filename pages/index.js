@@ -16,7 +16,9 @@ export default function Home() {
       <div>
         <div className="top-card">
           <h1>StrongMind Pizza</h1>
-          <h4>Click to select your job title </h4>
+          <h4>
+            Click to select your job title and routes will enable themselves
+          </h4>
 
           <div className="card-container">
             <div onClick={(e) => setMessage("Manager")} className="role-card">

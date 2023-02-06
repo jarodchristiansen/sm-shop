@@ -61,13 +61,13 @@ const ManagerPage = () => {
       return (
         <div key={topping.name}>
           {topping.name !== selectedTopping ? (
-            <>
+            <div className="standard-row">
               <span>Topping: {topping.name}</span>
               <span>Quantity: {topping.quantity}</span>
               <button onClick={(e) => handleEditField(topping)}>Edit</button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="selected-topping-row">
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -76,24 +76,28 @@ const ManagerPage = () => {
               >
                 X
               </button>
-              <label htmlFor="topping_name">Topping Name</label>
-              <input
-                type="text"
-                name="topping_name"
-                defaultValue={topping.name}
-              />
+              <div>
+                <label htmlFor="topping_name">Topping Name</label>
+                <input
+                  type="text"
+                  name="topping_name"
+                  defaultValue={topping.name}
+                />
+              </div>
 
-              <label htmlFor="quantity">Quantity Avail</label>
-              <input
-                type="number"
-                min={1}
-                max={100}
-                name="quantity"
-                defaultValue={topping.quantity}
-              />
+              <div>
+                <label htmlFor="quantity">Quantity Avail</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  name="quantity"
+                  defaultValue={topping.quantity}
+                />
+              </div>
 
               <button type="submit">Submit</button>
-            </>
+            </div>
           )}
         </div>
       );
@@ -134,17 +138,6 @@ const ManagerPage = () => {
       alert(
         "Topping already exists, would you like to replace the quantity of this topping instead?"
       );
-
-      //   let updatedQuantities = toppingsList.map((topping) => {
-      //     if (topping.name === toppingInput) {
-      //       // TODO: Resolve string to number conversion here
-      //       console.log({ topping });
-      //       topping.quantity = toppingQuantity;
-      //     }
-
-      //     return topping;
-      //   });
-
       let filteredTopping = toppingsList.filter(
         (topping) => topping.name === toppingInput
       );
@@ -155,8 +148,6 @@ const ManagerPage = () => {
       await addTopping({
         variables: result,
       });
-
-      //   setToppingsList([...updatedQuantities]);
     }
 
     // CLOSES OUT EDIT MODE OF FIELD
@@ -182,20 +173,25 @@ const ManagerPage = () => {
 
   return (
     <PageContain>
-      <h2>This is the manager Page</h2>
+      <h1>Manager Portal</h1>
 
       <ToppingsForm onSubmit={handleFormSubmit} onChange={handleFormChange}>
-        <h3>Toppings Input Form</h3>
+        <div className="input-container">
+          <label htmlFor="topping_name">Topping Name</label>
+          <input type="text" name="topping_name" />
 
-        <label htmlFor="topping_name">Topping Name</label>
-        <input type="text" name="topping_name" />
+          <label htmlFor="quantity">Quantity Avail</label>
+          <input type="number" min={1} max={100} name="quantity" />
+        </div>
 
-        <label htmlFor="quantity">Quantity Avail</label>
-        <input type="number" min={1} max={100} name="quantity" />
+        <div>
+          <button type="submit">Submit</button>
+        </div>
 
-        <button type="submit">Submit</button>
-
-        <div>Toppings list</div>
+        <div className="list-header">
+          <h4>Toppings List</h4>
+          <span>Add, Edit, or Remove Toppings</span>
+        </div>
 
         <ListContainer>{ToppingsItems}</ListContainer>
       </ToppingsForm>
@@ -206,13 +202,25 @@ const ManagerPage = () => {
 const ListContainer = styled.div`
   display: flex;
   flex-direction: column;
-  min-width: 30rem;
+  width: 100%;
+  max-width: 40rem;
+  gap: 0.5rem;
 
-  div {
-    display: flex;
+  .standard-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 0.5fr;
     width: 100%;
     justify-content: space-between;
-    border: 1px solid black;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+  }
+
+  .selected-topping-row {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid gray;
+    border-radius: 5px;
   }
 `;
 
@@ -222,7 +230,27 @@ const ToppingsForm = styled.form`
   width: 100%;
   border: 1px solid black;
   align-items: center;
-  padding: 2rem;
+  padding: 2rem 0;
+  gap: 1rem;
+  max-width: 60rem;
+
+  .input-container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+
+    input {
+      border: 1px solid gray;
+      border-radius: 5px;
+      padding: 0.5rem 1rem;
+    }
+  }
+
+  .list-header {
+    padding: 2rem 0;
+    text-align: center;
+  }
 `;
 
 const PageContain = styled.div`
@@ -232,6 +260,12 @@ const PageContain = styled.div`
   justify-content: center;
   align-items: center;
   padding: 2rem 0;
+
+  button {
+    background-color: gray;
+    color: white;
+    font-weight: bold;
+  }
 `;
 
 export default ManagerPage;

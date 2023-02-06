@@ -76,8 +76,6 @@ function Header() {
     return routes.map((route, idx) => {
       if (!route?.key) return;
 
-      console.log({ route }, !!route.guarded);
-
       return (
         <div key={route?.route}>
           {!!route.guarded && (
@@ -88,28 +86,13 @@ function Header() {
               )}
             </TextContainer>
           )}
-
-          {/* {!route.guarded && (
-            <TextContainer>
-              <Link href={route.route}>{route.text}</Link>
-              {selectedRoute == route.key && (
-                <h6 className="active-underline-span"></h6>
-              )}
-            </TextContainer>
-          )} */}
         </div>
       );
     });
   }, [routes?.length, selectedRoute, session, message]);
 
   return (
-    <Navbar
-      collapseOnSelect
-      expand="lg"
-      // bg="light"
-      // variant="light"
-      onSelect={handleSelect}
-    >
+    <Navbar collapseOnSelect expand="lg" onSelect={handleSelect}>
       <Container>
         <Navbar.Brand onClick={() => setSelectedRoute("")}>
           <Link href={"/"} passHref legacyBehavior>
@@ -125,6 +108,7 @@ function Header() {
                 repeatType: "mirror",
                 ease: "easeInOut",
               }}
+              style={{ cursor: "pointer" }}
             >
               <Image
                 src="/assets/retail.svg"
