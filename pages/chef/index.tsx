@@ -9,7 +9,7 @@ const ChefPage = () => {
   const [chefView, setChefView] = useState("Existing");
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [currentPizza, setCurrentPizza] = useState<any>([]);
-  const [editSelectPizza, setEditSelectPizza] = useState<any>();
+
   const [toppingsList, setToppingsList] = useState([]);
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
@@ -47,7 +47,7 @@ const ChefPage = () => {
     }
   }, [pizzaData]);
 
-  const handleToppingQuantity = (inputTopping) => {
+  const handleToppingQuantity = (inputTopping, step) => {
     console.log({ toppingsList, inputTopping }, "IN HANDLE TOPPING QUANTITY");
 
     let copyAvailToppings = [...toppingsList];
@@ -63,7 +63,10 @@ const ChefPage = () => {
         let copyIngredient = { ...ingredient };
 
         if (ingredient.name === inputTopping.name) {
-          copyIngredient.quantity--;
+          // TODO: Make this more intuitive due to inversion
+          step === "increment"
+            ? copyIngredient.quantity--
+            : copyIngredient.quantity++;
 
           console.log({ copyIngredient });
         }
@@ -84,7 +87,14 @@ const ChefPage = () => {
     // setToppingQuantity(value);
   };
 
-  const addIngredientToPizzaList = (topping) => {
+  // const removeIngredientFromCurrentPizza = (topping) => {
+  //   if (currentPizza && currentPizza?.ingredients) {
+  //     let copyPizza = {...currentPizza};
+
+  //   }
+  // };
+
+  const updateIngredientOnCurrentPizza = (topping, step) => {
     if (currentPizza && currentPizza?.ingredients) {
       let copyPizza = { ...currentPizza };
 
@@ -94,11 +104,14 @@ const ChefPage = () => {
 
       if (filteredIngredient.length) {
         // If ingredient already exists
+        // TODO: ADD number boundaries min/max on adjustments
         copyPizza.ingredients = copyPizza.ingredients.map((ingredient) => {
           let copyIngredient = { ...ingredient };
 
           if (ingredient.name === topping.name) {
-            copyIngredient.quantity++;
+            step === "increment"
+              ? copyIngredient.quantity++
+              : copyIngredient.quantity--;
           }
 
           return copyIngredient;
@@ -148,8 +161,8 @@ const ChefPage = () => {
 
           <button
             onClick={(e) => {
-              addIngredientToPizzaList(topping);
-              handleToppingQuantity(topping);
+              updateIngredientOnCurrentPizza(topping, "increment");
+              handleToppingQuantity(topping, "increment");
             }}
             disabled={topping.quantity === 0}
           >
@@ -164,17 +177,27 @@ const ChefPage = () => {
     if (!currentPizza?.ingredients?.length) return [];
 
     return currentPizza.ingredients.map((topping) => {
-      return (
-        <div key={topping.name}>
-          <span>Topping: {topping.name}</span>
+      if (topping.quantity) {
+        return (
+          <div key={topping.name}>
+            <span>Topping: {topping.name}</span>
 
-          <label htmlFor="quantity">quantity</label>
+            <label htmlFor="quantity">quantity</label>
 
-          <button onClick={(e) => addIngredientToPizzaList(topping)}>-</button>
+            <button
+              onClick={(e) => {
+                updateIngredientOnCurrentPizza(topping, "decrement");
+                handleToppingQuantity(topping, "decrement");
+              }}
+              disabled={topping.quantity === 0}
+            >
+              -
+            </button>
 
-          <span>{topping.quantity}</span>
-        </div>
-      );
+            <span>{topping.quantity}</span>
+          </div>
+        );
+      }
     });
   }, [currentPizza, toppingQuantity, toppingsList]);
 
@@ -214,7 +237,7 @@ const ChefPage = () => {
   return (
     <PageContain>
       Chef Page
-      {chefView === "Existing" && !editSelectPizza && (
+      {chefView === "Existing" && (
         <>
           {ExistingPizzas}
 
