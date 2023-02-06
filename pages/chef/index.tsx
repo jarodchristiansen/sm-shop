@@ -59,15 +59,42 @@ const ChefPage = () => {
   };
 
   const addIngredientToPizzaList = (topping) => {
-    console.log(
-      { topping, toppingQuantity, currentPizza },
-      "IN ADD INGREDIENT TO PIZZA LIST"
-    );
+    if (currentPizza && currentPizza?.ingredients) {
+      let copyPizza = { ...currentPizza };
 
-    setCurrentPizza([
-      ...currentPizza,
-      { name: topping.name, quantity: toppingQuantity },
-    ]);
+      let filteredIngredient = copyPizza.ingredients.filter(
+        (ingredient) => ingredient.name === topping.name
+      );
+
+      if (filteredIngredient.length) {
+        // If ingredient already exists
+        copyPizza.ingredients = copyPizza.ingredients.map((ingredient) => {
+          if (ingredient.name === topping.name) {
+            ingredient.quantity++;
+          }
+
+          return ingredient;
+        });
+
+        setCurrentPizza({
+          ...copyPizza,
+        });
+      } else {
+        setCurrentPizza({
+          name: currentPizza.name,
+          ingredients: [
+            ...currentPizza?.ingredients,
+            { name: topping.name, quantity: 1 },
+          ],
+        });
+      }
+    } else {
+      // In create new pizza case
+      setCurrentPizza({
+        name: "",
+        ingredients: [{ name: topping.name, quantity: 1 }],
+      });
+    }
   };
 
   const AvailableToppings = useMemo(() => {
@@ -92,7 +119,7 @@ const ChefPage = () => {
         </div>
       );
     });
-  }, [toppingsList, toppingQuantity]);
+  }, [toppingsList, toppingQuantity, currentPizza]);
 
   const CurrentPizzaIngredients = useMemo(() => {
     if (!currentPizza?.ingredients?.length) return [];
@@ -105,25 +132,15 @@ const ChefPage = () => {
           <label htmlFor="quantity">quantity</label>
 
           <button onClick={(e) => addIngredientToPizzaList(topping)}>-</button>
-          {/* <input
-            type="number"
-            min={0}
-            max={10}
-            name="quantity"
-            defaultValue={topping.quantity}
-            onChange={handleToppingQuantity}
-            disabled
-          /> */}
+
           <span>{topping.quantity}</span>
         </div>
       );
     });
-  }, [currentPizza, toppingQuantity]);
+  }, [currentPizza, toppingQuantity, toppingsList]);
 
   const ExistingPizzas = useMemo(() => {
     if (!existingPizzas.length) return [];
-
-    console.log({ existingPizzas });
 
     return existingPizzas.map((pizza) => {
       return (
@@ -153,6 +170,8 @@ const ChefPage = () => {
     });
   }, [existingPizzas]);
 
+  console.log({ currentPizza });
+
   return (
     <PageContain>
       Chef Page
@@ -176,16 +195,14 @@ const ChefPage = () => {
             See Existing Pizzas
           </button>
 
-          {
-            <div>
-              <label htmlFor="order_name">Order Name:</label>
-              <input
-                type="text"
-                name="order_name"
-                defaultValue={currentPizza?.name}
-              />
-            </div>
-          }
+          <div>
+            <label htmlFor="order_name">Order Name:</label>
+            <input
+              type="text"
+              name="order_name"
+              defaultValue={currentPizza?.name}
+            />
+          </div>
 
           <ListsContainer>
             <div>
