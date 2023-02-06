@@ -45,8 +45,13 @@ export const ToppingsResolver = {
     updateToppings: async (_, { input }) => {
       try {
         for (let topping of input) {
-          let updatedTopping = new Toppings(topping);
-          let result = await updatedTopping.save();
+          let existingTopping = await Toppings.findOneAndUpdate(
+            { name: topping.name },
+            { quantity: topping.quantity }
+          );
+          let result = await existingTopping.save();
+          // let updatedTopping = new Toppings(topping);
+          // let result = await updatedTopping.save();
           console.log({ result });
         }
 

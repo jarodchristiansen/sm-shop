@@ -54,7 +54,13 @@ const typeDefs = gql`
     quantity: Float
   }
 
+  input PizzaInput {
+    name: String
+    ingredients: [ToppingsInput]
+  }
+
   type Mutation {
+    createPizza(input: PizzaInput): Pizza
     updateToppings(input: [ToppingsInput]): [Topping]
     removeTopping(name: String): Topping
     addTopping(name: String, quantity: Float): Topping

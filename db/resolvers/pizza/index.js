@@ -20,6 +20,13 @@ export const PizzaResolver = {
     // },
   },
   mutations: {
+    createPizza: async (_, { input }) => {
+      try {
+        console.log({ input }, "IN CREATE PIZZA");
+      } catch (err) {
+        console.log({ err }, "IN CREATE PIZZA");
+      }
+    },
     // addTopping: async (_, { name, quantity }) => {
     //   try {
     //     let existingTopping = await Toppings.findOne({ name });

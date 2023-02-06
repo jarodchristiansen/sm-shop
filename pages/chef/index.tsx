@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 import { UPDATE_TOPPINGS } from "@/helpers/mutations/toppings";
+import { CREATE_PIZZA } from "@/helpers/mutations/pizzas";
 
 const ChefPage = () => {
   const [existingPizzas, setExistingPizzas] = useState([]);
@@ -35,6 +36,11 @@ const ChefPage = () => {
     updateToppings,
     { loading: updateToppingsLoading, error: updateToppingsError },
   ] = useMutation(UPDATE_TOPPINGS);
+
+  const [
+    createPizza,
+    { loading: createPizzaLoading, error: createPizzaError },
+  ] = useMutation(CREATE_PIZZA);
 
   useEffect(() => {
     getToppings();
@@ -238,7 +244,13 @@ const ChefPage = () => {
       return { name: topping.name, quantity: topping.quantity };
     });
 
+    let pizzaCopy = { ...currentPizza };
+    pizzaCopy.ingredients = pizzaCopy.ingredients.map((ingredient) => {
+      return { name: ingredient.name, quantity: ingredient.quantity };
+    });
+
     updateToppings({ variables: { input: newToppingsList } });
+    createPizza({ variables: { input: pizzaCopy } });
   };
 
   return (
