@@ -35,6 +35,18 @@ const ChefPage = () => {
     }
   }, [pizzaData]);
 
+  const startNewPizza = () => {
+    setCurrentPizza(null);
+    setInitializedPizza(null);
+    setChefView("Create");
+  };
+
+  const editExistingPizza = (pizza) => {
+    setInitializedPizza(pizza);
+    setCurrentPizza(pizza);
+    setChefView("Create");
+  };
+
   const ExistingPizzas = useMemo(() => {
     if (!existingPizzas.length) return [];
 
@@ -53,15 +65,7 @@ const ChefPage = () => {
             })}
           </div>
 
-          <button
-            onClick={(e) => {
-              setInitializedPizza(pizza);
-              setCurrentPizza(pizza);
-              setChefView("Create");
-            }}
-          >
-            Edit
-          </button>
+          <button onClick={(e) => editExistingPizza(pizza)}>Edit</button>
         </PizzaRow>
       );
     });
@@ -74,31 +78,33 @@ const ChefPage = () => {
       {chefView === "Existing" && pizzasLoading && <LoadingDiv />}
 
       {chefView === "Existing" && ExistingPizzas && (
-        <>
+        <ExistingPizzasContainer>
           {ExistingPizzas}
 
-          <button
-            onClick={(e) => {
-              setCurrentPizza(null);
-              setInitializedPizza(null);
-              setChefView("Create");
-            }}
-          >
-            Make a new Pizza
-          </button>
-        </>
+          <button onClick={(e) => startNewPizza()}>Make a new Pizza</button>
+        </ExistingPizzasContainer>
       )}
+
       {chefView === "Create" && (
         <CreatePizzaForm
           currentPizza={currentPizza}
           setCurrentPizza={setCurrentPizza}
           setChefView={setChefView}
           initializedPizza={initializedPizza}
+          existingPizzas={existingPizzas}
         />
       )}
     </PageContain>
   );
 };
+
+const ExistingPizzasContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  gap: 2rem;
+`;
 
 const PizzaRow = styled.div`
   display: flex;

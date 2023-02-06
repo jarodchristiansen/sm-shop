@@ -13,6 +13,7 @@ interface CreatePizzaFormProps {
   setCurrentPizza: (pizza: Pizza | null) => void;
   setChefView: (view: string) => void;
   initializedPizza: Pizza | null;
+  existingPizzas: Pizza[] | [];
 }
 
 const CreatePizzaForm = ({
@@ -20,11 +21,12 @@ const CreatePizzaForm = ({
   setCurrentPizza,
   setChefView,
   initializedPizza,
+  existingPizzas,
 }: CreatePizzaFormProps) => {
   const [toppingQuantity, setToppingQuantity] = useState(0);
-  const [submitDisabled, setSubmitDisabled] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [toppingsList, setToppingsList] = useState([]);
+  const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery(GET_TOPPINGS, {
@@ -63,12 +65,14 @@ const CreatePizzaForm = ({
   }, [data]);
 
   const handleToppingQuantity = (inputTopping, step) => {
+    // Handles store toppings available to maintain inventory
     let copyAvailToppings = [...toppingsList];
 
     let filteredList = copyAvailToppings.filter(
       (topping) => topping.name === inputTopping.name
     );
 
+    // Checks for existing ingredient, adds/removes accordingly
     if (filteredList.length) {
       copyAvailToppings = copyAvailToppings.map((ingredient) => {
         let copyIngredient = { ...ingredient };
@@ -103,10 +107,14 @@ const CreatePizzaForm = ({
   };
 
   const handleSubmitPizza = () => {
+    // TODO: handle __typename upstream
+    // Creates new copy of toppingslist to remove __typename
     let newToppingsList = toppingsList.map((topping) => {
       return { name: topping.name, quantity: topping.quantity };
     });
 
+    //TODO: handle__typename upstream
+    // Creates new copy of currentPizza to remove __typename in ingredients
     let pizzaCopy = { name: "", ingredients: [] };
     pizzaCopy.name = currentPizza.name;
 
@@ -114,9 +122,21 @@ const CreatePizzaForm = ({
       return { name: ingredient.name, quantity: ingredient.quantity };
     });
 
+    // Checks if user deletes all items on current pizza and attempts submit
     let nonExistingIngredients = pizzaCopy.ingredients.filter(
       (ingredient) => ingredient.quantity < 1
     );
+
+    let copyNameOfExistingPizza = existingPizzas.filter(
+      (pizza) => pizza.name == pizzaCopy.name
+    );
+
+    if (copyNameOfExistingPizza?.length) {
+      setErrorMessage(
+        "CANNOT CREATE DUPLICATE OF EXISTING PIZZA, PLEASE CHANGE CUSTOMER NAME TO ACCOMODATE"
+      );
+      return;
+    }
 
     if (!pizzaCopy?.name) {
       setErrorMessage("NO CUSTOMER NAME CREATED");
@@ -131,6 +151,7 @@ const CreatePizzaForm = ({
 
       return;
     } else {
+      // Updates toppings while creating pizza to manage total inventory
       updateToppings({ variables: { input: newToppingsList } });
       createPizza({ variables: { input: pizzaCopy } });
       setChefView("Existing");
@@ -142,16 +163,17 @@ const CreatePizzaForm = ({
     if (currentPizza && currentPizza?.ingredients) {
       let copyPizza = { ...currentPizza };
 
+      // Check if ingredient is already on pizza
       let filteredIngredient = copyPizza.ingredients.filter(
         (ingredient) => ingredient.name === topping.name
       );
 
+      // If ingredient already on current pizza
       if (filteredIngredient.length) {
-        // If ingredient already exists
-        // TODO: ADD number boundaries min/max on adjustments
         copyPizza.ingredients = copyPizza.ingredients.map((ingredient) => {
           let copyIngredient = { ...ingredient };
 
+          // Increment/decrement currentPizza accordingly based on button input
           if (ingredient.name === topping.name) {
             step === "increment"
               ? copyIngredient.quantity++
@@ -165,6 +187,7 @@ const CreatePizzaForm = ({
           ...copyPizza,
         });
       } else {
+        // If ingredient isn't on pizza, add new line item for it
         setCurrentPizza({
           name: currentPizza.name,
           ingredients: [
@@ -174,7 +197,7 @@ const CreatePizzaForm = ({
         });
       }
     } else {
-      // In create new pizza case
+      // If no current pizza, ie Creating new pizza
       setCurrentPizza({
         name: currentPizza?.name,
         ingredients: [{ name: topping.name, quantity: 1 }],
@@ -182,30 +205,33 @@ const CreatePizzaForm = ({
     }
   };
 
+  const handleIngredientInventory = (topping, step) => {
+    updateIngredientOnCurrentPizza(topping, step);
+    handleToppingQuantity(topping, step);
+  };
+
   const AvailableToppings = useMemo(() => {
     if (!toppingsList.length) return [];
 
     return toppingsList.map((topping) => {
       return (
-        <div key={topping.name}>
-          <span>Topping: {topping.name}</span>
+        <div key={topping.name} className="available-topping-row">
+          <span>Topping: {topping.name} </span>
 
-          <label htmlFor="quantity">Quantity Avail</label>
-          <input
-            type="number"
-            min={0}
-            max={topping.quantity}
-            name="quantity"
-            value={topping.quantity}
-            // defaultValue={topping.quantity}
-            disabled
-          />
+          <div>
+            <label htmlFor="quantity">x</label>
+            <input
+              type="number"
+              min={0}
+              max={topping.quantity}
+              name="quantity"
+              value={topping.quantity}
+              disabled
+            />
+          </div>
 
           <button
-            onClick={(e) => {
-              updateIngredientOnCurrentPizza(topping, "increment");
-              handleToppingQuantity(topping, "increment");
-            }}
+            onClick={(e) => handleIngredientInventory(topping, "increment")}
             disabled={topping.quantity === 0}
           >
             +
@@ -227,31 +253,35 @@ const CreatePizzaForm = ({
             <label htmlFor="quantity">quantity</label>
 
             <button
-              onClick={(e) => {
-                updateIngredientOnCurrentPizza(topping, "decrement");
-                handleToppingQuantity(topping, "decrement");
-              }}
+              onClick={(e) => handleIngredientInventory(topping, "decrement")}
               disabled={topping.quantity === 0}
             >
               -
             </button>
 
-            <span>{topping.quantity}</span>
+            <input
+              type="number"
+              min={0}
+              max={topping.quantity}
+              name="quantity"
+              value={topping.quantity}
+              disabled
+            />
           </div>
         );
       }
     });
   }, [currentPizza, toppingQuantity, toppingsList]);
 
+  const resetToMainChefPage = () => {
+    setErrorMessage("");
+    setCurrentPizza(null);
+    setChefView("Existing");
+  };
+
   return (
     <CreateContainer>
-      <button
-        onClick={(e) => {
-          setErrorMessage("");
-          setCurrentPizza(null);
-          setChefView("Existing");
-        }}
-      >
+      <button onClick={(e) => resetToMainChefPage()}>
         See Existing Pizzas
       </button>
 
@@ -271,27 +301,26 @@ const CreatePizzaForm = ({
         />
       </div>
 
-      {(loading ||
-        updateToppingsLoading ||
-        deletePizzaLoading ||
-        createPizzaLoading) &&
-        !AvailableToppings.length &&
-        !CurrentPizzaIngredients.length && <LoadingDiv />}
-
-      {!!AvailableToppings.length && !!CurrentPizzaIngredients.length && (
-        <ListsContainer>
-          <div className="available-toppings-table">
-            <h4>Adding Ingredients</h4>
-            {AvailableToppings}
-          </div>
-
-          <div className="current-pizza-table">
-            <h4>Current Pizza</h4>
-
-            {CurrentPizzaIngredients}
-          </div>
-        </ListsContainer>
+      {(loading || updateToppingsLoading || createPizzaLoading) && (
+        <LoadingDiv />
       )}
+
+      {AvailableToppings &&
+        CurrentPizzaIngredients &&
+        (!loading || !updateToppingsLoading || !createPizzaLoading) && (
+          <ListsContainer>
+            <div className="available-toppings-table">
+              <h4>Available Ingredients</h4>
+              {AvailableToppings}
+            </div>
+
+            <div className="current-pizza-table">
+              <h4>Current Pizza</h4>
+
+              {CurrentPizzaIngredients}
+            </div>
+          </ListsContainer>
+        )}
 
       {errorMessage && (
         <div>
@@ -323,8 +352,11 @@ const ListsContainer = styled.div`
     border: 2px solid black;
     padding: 2rem;
 
-    div {
+    .available-topping-row {
+      display: flex;
+      justify-content: space-between;
       border-top: 1px solid gray;
+      align-items: center;
     }
   }
 
