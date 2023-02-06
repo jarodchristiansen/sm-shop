@@ -60,6 +60,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
+    deletePizza(input: PizzaInput): Pizza
     createPizza(input: PizzaInput): Pizza
     updateToppings(input: [ToppingsInput]): [Topping]
     removeTopping(name: String): Topping

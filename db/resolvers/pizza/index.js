@@ -1,4 +1,5 @@
 import Pizzas from "../../models/pizza";
+import Toppings from "../../models/topping";
 
 export const PizzaResolver = {
   queries: {
@@ -22,7 +23,6 @@ export const PizzaResolver = {
   mutations: {
     createPizza: async (_, { input }) => {
       try {
-        console.log({ input }, "IN CREATE PIZZA");
         let pizza = await Pizzas.findOne({ name: input.name });
 
         if (pizza) {
@@ -43,6 +43,32 @@ export const PizzaResolver = {
         }
       } catch (err) {
         console.log({ err }, "IN CREATE PIZZA");
+      }
+    },
+
+    deletePizza: async (_, { input }) => {
+      try {
+        for (let topping of input.ingredients) {
+          console.log("IN DELETE PIZZA", { topping });
+
+          let existingTopping = await Toppings.findOne({ name: topping.name });
+
+          if (existingTopping) {
+            existingTopping.quantity =
+              existingTopping.quantity + topping.quantity;
+
+            await existingTopping.save();
+          }
+
+          // let updatedTopping = new Toppings(topping);
+          // let result = await updatedTopping.save();
+        }
+
+        let result = await Pizzas.findOne({ name: input.name }).remove();
+
+        return input;
+      } catch (err) {
+        console.log({ err });
       }
     },
     // addTopping: async (_, { name, quantity }) => {

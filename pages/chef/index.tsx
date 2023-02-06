@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 import { UPDATE_TOPPINGS } from "@/helpers/mutations/toppings";
-import { CREATE_PIZZA } from "@/helpers/mutations/pizzas";
+import { CREATE_PIZZA, DELETE_PIZZA } from "@/helpers/mutations/pizzas";
 
 const ChefPage = () => {
   const [existingPizzas, setExistingPizzas] = useState([]);
@@ -39,12 +39,23 @@ const ChefPage = () => {
   const [
     updateToppings,
     { loading: updateToppingsLoading, error: updateToppingsError },
-  ] = useMutation(UPDATE_TOPPINGS);
+  ] = useMutation(UPDATE_TOPPINGS, {
+    refetchQueries: [{ query: GET_EXISTING_PIZZAS }, { query: GET_TOPPINGS }],
+  });
 
   const [
     createPizza,
     { loading: createPizzaLoading, error: createPizzaError },
-  ] = useMutation(CREATE_PIZZA);
+  ] = useMutation(CREATE_PIZZA, {
+    refetchQueries: [{ query: GET_EXISTING_PIZZAS }, { query: GET_TOPPINGS }],
+  });
+
+  const [
+    deletePizza,
+    { loading: deletePizzaLoading, error: deletePizzaError },
+  ] = useMutation(DELETE_PIZZA, {
+    refetchQueries: [{ query: GET_EXISTING_PIZZAS }, { query: GET_TOPPINGS }],
+  });
 
   useEffect(() => {
     getToppings();
@@ -141,7 +152,7 @@ const ChefPage = () => {
     } else {
       // In create new pizza case
       setCurrentPizza({
-        name: "",
+        name: currentPizza?.name,
         ingredients: [{ name: topping.name, quantity: 1 }],
       });
     }
@@ -254,24 +265,40 @@ const ChefPage = () => {
       return { name: ingredient.name, quantity: ingredient.quantity };
     });
 
-    if (!pizzaCopy?.name || !pizzaCopy?.ingredients.length) {
+    let existingIngredients = pizzaCopy.ingredients.filter(
+      (ingredient) => ingredient.quantity < 1
+    );
+
+    console.log({ existingIngredients });
+
+    if (!pizzaCopy?.name) {
       setErrorMessage("NO CUSTOMER NAME CREATED");
 
       return;
-    }
-    //  else if (
-    //   existingPizzas.filter((pizza) => pizza.name === pizzaCopy.name).length > 0
-    // ) {
-    //   // TODO:  handle proper cases when updating pizza
-    //   setErrorMessage(
-    //     "CUSTOMER ORDER ALREADY EXISTS PLEASE CHANGE CUSTOMER NAME"
-    //   );
-    //   return;
-    // }
-    else {
+    } else if (existingIngredients.length === pizzaCopy.ingredients.length) {
+      setErrorMessage(
+        "ATTEMPTING TO SAVE PIZZA WITHOUT INGREDIENTS, PLEASE DELETE INSTEAD"
+      );
+      return;
+    } else {
       updateToppings({ variables: { input: newToppingsList } });
       createPizza({ variables: { input: pizzaCopy } });
+      setChefView("Existing");
     }
+  };
+
+  const handleDeletePizza = async () => {
+    console.log({ currentPizza }, "IN HANDLE DELETE PIZZA");
+
+    let pizzaCopy = { name: "", ingredients: [] };
+    pizzaCopy.name = currentPizza.name;
+
+    pizzaCopy.ingredients = currentPizza.ingredients.map((ingredient) => {
+      return { name: ingredient.name, quantity: ingredient.quantity };
+    });
+
+    await deletePizza({ variables: { input: pizzaCopy } });
+    setChefView("Existing");
   };
 
   return (
@@ -281,7 +308,13 @@ const ChefPage = () => {
         <>
           {ExistingPizzas}
 
-          <button onClick={(e) => setChefView("Create")}>
+          <button
+            onClick={(e) => {
+              setCurrentPizza([]);
+              setInitializedPizza([]);
+              setChefView("Create");
+            }}
+          >
             Make a new Pizza
           </button>
         </>
@@ -331,6 +364,7 @@ const ChefPage = () => {
           </div>
 
           <div>
+            <button onClick={handleDeletePizza}>Delete</button>
             <button onClick={handleSubmitPizza}>Save</button>
           </div>
         </CreateContainer>

@@ -52,7 +52,6 @@ export const ToppingsResolver = {
           let result = await existingTopping.save();
           // let updatedTopping = new Toppings(topping);
           // let result = await updatedTopping.save();
-          console.log({ result });
         }
 
         return input;
