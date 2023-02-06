@@ -6,6 +6,7 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 
 import { Role_data } from "../../contexts/role";
 import { useRouter } from "next/router";
+import LoadingDiv from "@/components/commons/LoadingDiv";
 
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
@@ -224,7 +225,10 @@ const ManagerPage = () => {
           <span>Add, Edit, or Remove Toppings</span>
         </div>
 
-        <ListContainer>{ToppingsItems}</ListContainer>
+        {loading && <LoadingDiv />}
+        {!loading && ToppingsItems && (
+          <ListContainer>{ToppingsItems}</ListContainer>
+        )}
       </ToppingsForm>
     </PageContain>
   );
