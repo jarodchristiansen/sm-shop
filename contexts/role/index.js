@@ -1,44 +1,44 @@
 import { createContext, useEffect, useState } from "react";
 
-export const Message_data = createContext(null);
+export const Role_data = createContext(null);
 
 function RoleContext({ children }) {
-  const [message, setMessage] = useState();
+  const [role, setRole] = useState();
 
   useEffect(() => {
     getRoleFromStorage();
   }, []);
 
   const getRoleFromStorage = () => {
-    if (!message) {
+    if (!role) {
       let existingRole = localStorage.getItem("user-role");
 
       if (existingRole) {
-        setMessage(existingRole);
+        setRole(existingRole);
       }
     }
   };
 
   useEffect(() => {
     swapRole();
-  }, [message]);
+  }, [role]);
 
   const swapRole = () => {
-    if (message) {
+    if (role) {
       let existingRole = localStorage.getItem("user-role");
 
-      if (existingRole && existingRole !== message) {
-        localStorage.setItem("user-role", message);
+      if (existingRole && existingRole !== role) {
+        localStorage.setItem("user-role", role);
       } else if (!existingRole) {
-        localStorage.setItem("user-role", message);
+        localStorage.setItem("user-role", role);
       }
     }
   };
 
   return (
-    <Message_data.Provider value={{ message, setMessage }}>
+    <Role_data.Provider value={{ role, setRole }}>
       {children}
-    </Message_data.Provider>
+    </Role_data.Provider>
   );
 }
 

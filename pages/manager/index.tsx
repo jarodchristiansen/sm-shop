@@ -1,18 +1,21 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
-import { ADD_TOPPING } from "@/helpers/mutations/toppings";
+import { ADD_TOPPING, REMOVE_TOPPING } from "@/helpers/mutations/toppings";
 import { useLazyQuery, useMutation } from "@apollo/client";
 
-import { Message_data } from "../../contexts/role";
+import { Role_data } from "../../contexts/role";
+import { useRouter } from "next/router";
 
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
   const [toppingInput, setToppingInput] = useState("");
-  const [toppingQuantity, setToppingQuantity] = useState(0);
+  const [toppingQuantity, setToppingQuantity] = useState<string | number>("");
   const [selectedTopping, setSelectedTopping] = useState("");
 
-  const { message, setMessage } = useContext(Message_data);
+  const { role, setRole } = useContext(Role_data);
+
+  const router = useRouter();
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery(GET_TOPPINGS, {
@@ -29,12 +32,18 @@ const ManagerPage = () => {
   const [
     removeTopping,
     { loading: removeToppingLoading, error: removeToppingError },
-  ] = useMutation(ADD_TOPPING, {
+  ] = useMutation(REMOVE_TOPPING, {
     refetchQueries: [{ query: GET_TOPPINGS }],
   });
 
   useEffect(() => {
-    getToppings();
+    // TODO: Move to server side if possible from context
+    // Will probably require cookies instead of localStorage
+    if (role && role === "Manager") {
+      getToppings();
+    } else {
+      router.push("/");
+    }
   }, []);
 
   useEffect(() => {
@@ -42,47 +51,6 @@ const ManagerPage = () => {
       setToppingsList(data.getCurrentToppings);
     }
   }, [data]);
-
-  const ToppingsItems = useMemo(() => {
-    if (!toppingsList.length) return [];
-
-    return toppingsList.map((topping) => {
-      return (
-        <div key={topping.name}>
-          {topping.name !== selectedTopping ? (
-            <>
-              <span>Topping: {topping.name}</span>
-              <span>Quantity: {topping.quantity}</span>
-              <button onClick={(e) => handleEditField(topping)}>Edit</button>
-            </>
-          ) : (
-            <>
-              <button onClick={(e) => handleRemoveIngredient(topping)}>
-                X
-              </button>
-              <label htmlFor="topping_name">Topping Name</label>
-              <input
-                type="text"
-                name="topping_name"
-                defaultValue={topping.name}
-              />
-
-              <label htmlFor="quantity">Quantity Avail</label>
-              <input
-                type="number"
-                min={1}
-                max={100}
-                name="quantity"
-                defaultValue={topping.quantity}
-              />
-
-              <button type="submit">Submit</button>
-            </>
-          )}
-        </div>
-      );
-    });
-  }, [toppingsList, selectedTopping]);
 
   const handleFormChange = (e) => {
     e.preventDefault();
@@ -94,7 +62,12 @@ const ManagerPage = () => {
         setToppingInput(value);
         break;
       case "quantity":
-        setToppingQuantity(parseInt(value));
+        if (value) {
+          setToppingQuantity(parseInt(value));
+        } else {
+          setToppingQuantity("");
+        }
+
         break;
       default:
         break;
@@ -104,7 +77,6 @@ const ManagerPage = () => {
   const handleFormSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("IN HANDLE SUBMIT FORM", { e });
     let filtered = toppingsList.filter(
       (topping) => topping.name === toppingInput
     ).length;
@@ -118,17 +90,6 @@ const ManagerPage = () => {
       alert(
         "Topping already exists, would you like to replace the quantity of this topping instead?"
       );
-
-      //   let updatedQuantities = toppingsList.map((topping) => {
-      //     if (topping.name === toppingInput) {
-      //       // TODO: Resolve string to number conversion here
-      //       console.log({ topping });
-      //       topping.quantity = toppingQuantity;
-      //     }
-
-      //     return topping;
-      //   });
-
       let filteredTopping = toppingsList.filter(
         (topping) => topping.name === toppingInput
       );
@@ -139,12 +100,9 @@ const ManagerPage = () => {
       await addTopping({
         variables: result,
       });
-
-      //   setToppingsList([...updatedQuantities]);
     }
 
-    // CLOSES OUT EDIT MODE OF FIELD
-    setSelectedTopping("");
+    handleClearFields();
   };
 
   const handleEditField = (topping) => {
@@ -154,30 +112,117 @@ const ManagerPage = () => {
     setSelectedTopping(topping.name);
   };
 
-  const handleRemoveIngredient = (e: any) => {
-    let name = e.name;
+  const handleRemoveIngredient = (e, topping: any) => {
+    e.preventDefault();
+    let name = topping.name;
 
-    let newList = toppingsList.filter((topping) => topping.name !== name);
-
-    setToppingsList(newList);
+    removeTopping({ variables: { name } });
+    handleClearFields();
   };
+
+  const handleClearFields = () => {
+    setToppingInput("");
+    setToppingQuantity("");
+    setSelectedTopping("");
+  };
+
+  const submitDisabled = useMemo(() => {
+    if (!toppingInput || !toppingQuantity) {
+      return true;
+    } else if (toppingInput && toppingQuantity) {
+      return false;
+    }
+  }, [toppingInput, toppingQuantity, selectedTopping]);
+
+  const ToppingsItems = useMemo(() => {
+    if (!toppingsList.length) return [];
+
+    return toppingsList.map((topping) => {
+      return (
+        <div key={topping.name}>
+          {topping.name !== selectedTopping ? (
+            <div className="standard-row">
+              <span>Topping: {topping.name}</span>
+              <span>Quantity: {topping.quantity}</span>
+              <button onClick={(e) => handleEditField(topping)}>Edit</button>
+            </div>
+          ) : (
+            <div className="selected-topping-row">
+              <button
+                onClick={(e) => {
+                  handleRemoveIngredient(e, topping);
+                }}
+              >
+                X
+              </button>
+
+              <button onClick={() => handleClearFields()}>Cancel Edit</button>
+
+              <div>
+                <label htmlFor="topping_name">Topping Name</label>
+                <input
+                  type="text"
+                  name="topping_name"
+                  defaultValue={topping.name}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="quantity">Quantity Avail</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  name="quantity"
+                  defaultValue={topping.quantity}
+                />
+              </div>
+
+              <button type="submit" disabled={submitDisabled}>
+                Submit
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    });
+  }, [toppingsList, selectedTopping, submitDisabled]);
 
   return (
     <PageContain>
-      <h2>This is the manager Page</h2>
+      <h1>Manager Portal</h1>
 
       <ToppingsForm onSubmit={handleFormSubmit} onChange={handleFormChange}>
-        <h3>Toppings Input Form</h3>
+        <div className="input-container">
+          <label htmlFor="topping_name">Topping Name</label>
+          <input
+            type="text"
+            name="topping_name"
+            value={toppingInput}
+            onChange={() => console.log({ toppingInput })}
+          />
 
-        <label htmlFor="topping_name">Topping Name</label>
-        <input type="text" name="topping_name" />
+          <label htmlFor="quantity">Quantity Avail</label>
+          <input
+            type="number"
+            min={1}
+            max={100}
+            name="quantity"
+            value={toppingQuantity}
+            onChange={() => console.log({ toppingQuantity })}
+          />
+        </div>
 
-        <label htmlFor="quantity">Quantity Avail</label>
-        <input type="number" min={1} max={100} name="quantity" />
+        <div>
+          <button type="submit" disabled={submitDisabled}>
+            Submit
+          </button>
+        </div>
 
-        <button type="submit">Submit</button>
-
-        <div>Toppings list</div>
+        <div className="list-header">
+          <h4>Toppings List</h4>
+          <span>Add, Edit, or Remove Toppings</span>
+        </div>
 
         <ListContainer>{ToppingsItems}</ListContainer>
       </ToppingsForm>
@@ -188,13 +233,25 @@ const ManagerPage = () => {
 const ListContainer = styled.div`
   display: flex;
   flex-direction: column;
-  min-width: 30rem;
+  width: 100%;
+  max-width: 40rem;
+  gap: 0.5rem;
 
-  div {
-    display: flex;
+  .standard-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 0.5fr;
     width: 100%;
     justify-content: space-between;
-    border: 1px solid black;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+  }
+
+  .selected-topping-row {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid gray;
+    border-radius: 5px;
   }
 `;
 
@@ -204,7 +261,27 @@ const ToppingsForm = styled.form`
   width: 100%;
   border: 1px solid black;
   align-items: center;
-  padding: 2rem;
+  padding: 2rem 0;
+  gap: 1rem;
+  max-width: 60rem;
+
+  .input-container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+
+    input {
+      border: 1px solid gray;
+      border-radius: 5px;
+      padding: 0.5rem 1rem;
+    }
+  }
+
+  .list-header {
+    padding: 2rem 0;
+    text-align: center;
+  }
 `;
 
 const PageContain = styled.div`
@@ -214,6 +291,16 @@ const PageContain = styled.div`
   justify-content: center;
   align-items: center;
   padding: 2rem 0;
+
+  button {
+    background-color: gray;
+    color: white;
+    font-weight: bold;
+
+    :disabled {
+      cursor: not-allowed;
+    }
+  }
 `;
 
 export default ManagerPage;

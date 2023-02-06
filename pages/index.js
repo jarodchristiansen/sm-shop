@@ -2,34 +2,49 @@ import { MediaQueries } from "@/styles/MediaQueries";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import styled from "styled-components";
-
-import { Message_data } from "../contexts/role";
+import Image from "next/image";
+import { Role_data } from "../contexts/role";
 import { useContext, useEffect } from "react";
 import { useRouter } from "next/router";
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const { message, setMessage } = useContext(Message_data);
+  const { role, setRole } = useContext(Role_data);
 
   return (
     <AlternateHomePageWrapper>
       <div>
-        <h1>StrongMind Pizza</h1>
-
         <div className="top-card">
-          <h4>If you are a </h4>
+          <h1>StrongMind Pizza</h1>
+          <h4>
+            Click to select your job title and routes will enable themselves
+          </h4>
 
           <div className="card-container">
-            <div onClick={(e) => setMessage("Manager")}>
+            <div onClick={(e) => setRole("Manager")} className="role-card">
               <h5>Manager</h5>
 
-              {message === "Manager" && <div>YEEE</div>}
+              <Image
+                src="/assets/manager.svg"
+                width={80}
+                height={80}
+                alt="chef"
+              />
+
+              {role === "Manager" && <div className="selected-div" />}
             </div>
 
-            <div onClick={(e) => setMessage("Chef")}>
+            <div onClick={(e) => setRole("Chef")} className="role-card">
               <h5>Chef</h5>
 
-              {message === "Chef" && <div>YEEE</div>}
+              <Image
+                src="/assets/chefs-hat.svg"
+                width={80}
+                height={80}
+                alt="chef"
+              />
+
+              {role === "Chef" && <div className="selected-div" />}
             </div>
           </div>
         </div>
@@ -58,6 +73,30 @@ const AlternateHomePageWrapper = styled.div`
       flex-direction: row;
       justify-content: center;
       gap: 3rem;
+      cursor: pointer;
+
+      .role-card {
+        display: flex;
+        flex-direction: column;
+        border: 2px solid black;
+
+        padding: 2rem;
+        border-radius: 8px;
+        gap: 2rem;
+
+        h5 {
+          font-weight: bold;
+        }
+
+        .selected-div {
+          height: 2rem;
+          width: 2rem;
+          border-radius: 50%;
+          background-color: #32cd32;
+          margin: auto;
+          border: 1px solid black;
+        }
+      }
     }
   }
 `;

@@ -9,7 +9,7 @@ import { MediaQueries } from "@/styles/MediaQueries";
 import { Colors } from "@/styles/Colors";
 import { motion } from "framer-motion";
 
-import { Message_data } from "../../contexts/role";
+import { Role_data } from "../../contexts/role";
 /**
  *
  * @returns Header component above pages
@@ -18,7 +18,7 @@ function Header() {
   const { data: session, status } = useSession();
   const [selectedRoute, setSelectedRoute] = useState<string | number>("");
 
-  const { message, setMessage } = useContext(Message_data);
+  const { role, setRole } = useContext(Role_data);
 
   const router = useRouter();
   const { asPath } = router;
@@ -41,13 +41,13 @@ function Header() {
     {
       key: 1,
       route: "/manager",
-      guarded: message === "Manager",
+      guarded: role === "Manager",
       text: "Manager",
     },
     {
       key: 2,
       route: `/chef`,
-      guarded: message === "Chef" || message == "Manager",
+      guarded: role === "Chef" || role == "Manager",
       text: "Chef",
     },
     // !session && {
@@ -76,8 +76,6 @@ function Header() {
     return routes.map((route, idx) => {
       if (!route?.key) return;
 
-      console.log({ route }, !!route.guarded);
-
       return (
         <div key={route?.route}>
           {!!route.guarded && (
@@ -88,28 +86,13 @@ function Header() {
               )}
             </TextContainer>
           )}
-
-          {/* {!route.guarded && (
-            <TextContainer>
-              <Link href={route.route}>{route.text}</Link>
-              {selectedRoute == route.key && (
-                <h6 className="active-underline-span"></h6>
-              )}
-            </TextContainer>
-          )} */}
         </div>
       );
     });
-  }, [routes?.length, selectedRoute, session, message]);
+  }, [routes?.length, selectedRoute, session, role]);
 
   return (
-    <Navbar
-      collapseOnSelect
-      expand="lg"
-      // bg="light"
-      // variant="light"
-      onSelect={handleSelect}
-    >
+    <Navbar collapseOnSelect expand="lg" onSelect={handleSelect}>
       <Container>
         <Navbar.Brand onClick={() => setSelectedRoute("")}>
           <Link href={"/"} passHref legacyBehavior>
@@ -125,6 +108,7 @@ function Header() {
                 repeatType: "mirror",
                 ease: "easeInOut",
               }}
+              style={{ cursor: "pointer" }}
             >
               <Image
                 src="/assets/retail.svg"
