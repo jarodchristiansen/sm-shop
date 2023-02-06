@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 import CreatePizzaForm from "@/components/forms/CreatePizzaForm";
 import { Pizza } from "@/helpers/types";
+import LoadingDiv from "@/components/commons/LoadingDiv";
 
 const ChefPage = () => {
   const [existingPizzas, setExistingPizzas] = useState([]);
@@ -45,7 +46,7 @@ const ChefPage = () => {
           <div className="ingredient-column">
             {pizza?.ingredients.map((topping) => {
               return (
-                <span>
+                <span key={topping.name}>
                   {topping.name} - (x{topping.quantity})
                 </span>
               );
@@ -68,8 +69,11 @@ const ChefPage = () => {
 
   return (
     <PageContain>
-      Chef Page
-      {chefView === "Existing" && (
+      <h1>Chef Page</h1>
+
+      {chefView === "Existing" && pizzasLoading && <LoadingDiv />}
+
+      {chefView === "Existing" && ExistingPizzas && (
         <>
           {ExistingPizzas}
 

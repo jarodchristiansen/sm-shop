@@ -6,6 +6,7 @@ import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
 import { useEffect, useMemo, useState } from "react";
 import { Pizza } from "@/helpers/types";
+import LoadingDiv from "@/components/commons/LoadingDiv";
 
 interface CreatePizzaFormProps {
   currentPizza: Pizza | null;
@@ -270,22 +271,33 @@ const CreatePizzaForm = ({
         />
       </div>
 
-      <ListsContainer>
-        <div className="available-toppings-table">
-          <h4>Adding Ingredients</h4>
-          {AvailableToppings}
+      {(loading ||
+        updateToppingsLoading ||
+        deletePizzaLoading ||
+        createPizzaLoading) &&
+        !AvailableToppings.length &&
+        !CurrentPizzaIngredients.length && <LoadingDiv />}
+
+      {!!AvailableToppings.length && !!CurrentPizzaIngredients.length && (
+        <ListsContainer>
+          <div className="available-toppings-table">
+            <h4>Adding Ingredients</h4>
+            {AvailableToppings}
+          </div>
+
+          <div className="current-pizza-table">
+            <h4>Current Pizza</h4>
+
+            {CurrentPizzaIngredients}
+          </div>
+        </ListsContainer>
+      )}
+
+      {errorMessage && (
+        <div>
+          <h4>{errorMessage}</h4>
         </div>
-
-        <div className="current-pizza-table">
-          <h4>Current Pizza</h4>
-
-          {CurrentPizzaIngredients}
-        </div>
-      </ListsContainer>
-
-      <div>
-        <h4>{errorMessage}</h4>
-      </div>
+      )}
 
       <div>
         <button onClick={handleDeletePizza}>Delete</button>

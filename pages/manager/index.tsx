@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
 import { ADD_TOPPING, REMOVE_TOPPING } from "@/helpers/mutations/toppings";
 import { useLazyQuery, useMutation } from "@apollo/client";
-
 import { Role_data } from "../../contexts/role";
 import { useRouter } from "next/router";
 import LoadingDiv from "@/components/commons/LoadingDiv";
+import { Topping } from "@/helpers/types";
 
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
@@ -113,7 +113,7 @@ const ManagerPage = () => {
     setSelectedTopping(topping.name);
   };
 
-  const handleRemoveIngredient = (e, topping: any) => {
+  const handleRemoveIngredient = (e, topping: Topping) => {
     e.preventDefault();
     let name = topping.name;
 
