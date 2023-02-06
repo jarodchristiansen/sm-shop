@@ -3,12 +3,13 @@ import React, { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 import CreatePizzaForm from "@/components/forms/CreatePizzaForm";
+import { Pizza } from "@/helpers/types";
 
 const ChefPage = () => {
   const [existingPizzas, setExistingPizzas] = useState([]);
   const [chefView, setChefView] = useState("Existing");
-  const [currentPizza, setCurrentPizza] = useState<any>([]);
-  const [initializedPizza, setInitializedPizza] = useState<any>({});
+  const [currentPizza, setCurrentPizza] = useState<Pizza | null>(null);
+  const [initializedPizza, setInitializedPizza] = useState<Pizza | null>(null);
 
   const [
     getExistingPizzas,
@@ -74,8 +75,8 @@ const ChefPage = () => {
 
           <button
             onClick={(e) => {
-              setCurrentPizza([]);
-              setInitializedPizza([]);
+              setCurrentPizza(null);
+              setInitializedPizza(null);
               setChefView("Create");
             }}
           >

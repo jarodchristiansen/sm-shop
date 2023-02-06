@@ -5,12 +5,13 @@ import { useLazyQuery, useMutation } from "@apollo/client/react";
 import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 import { GET_TOPPINGS } from "@/helpers/queries/toppings";
 import { useEffect, useMemo, useState } from "react";
+import { Pizza } from "@/helpers/types";
 
 interface CreatePizzaFormProps {
-  currentPizza: any;
-  setCurrentPizza: (pizza: any) => void;
+  currentPizza: Pizza | null;
+  setCurrentPizza: (pizza: Pizza | null) => void;
   setChefView: (view: string) => void;
-  initializedPizza: any;
+  initializedPizza: Pizza | null;
 }
 
 const CreatePizzaForm = ({
@@ -86,7 +87,10 @@ const CreatePizzaForm = ({
 
   const handleDeletePizza = async () => {
     let pizzaCopy = { name: "", ingredients: [] };
-    pizzaCopy.name = currentPizza.name;
+
+    if (currentPizza?.name) {
+      pizzaCopy.name = currentPizza.name;
+    }
 
     pizzaCopy.ingredients = currentPizza.ingredients?.map((ingredient) => {
       return { name: ingredient.name, quantity: ingredient.quantity };
@@ -243,7 +247,7 @@ const CreatePizzaForm = ({
       <button
         onClick={(e) => {
           setErrorMessage("");
-          setCurrentPizza([]);
+          setCurrentPizza(null);
           setChefView("Existing");
         }}
       >
@@ -259,7 +263,7 @@ const CreatePizzaForm = ({
           onChange={(e) => {
             setCurrentPizza({
               name: e.target.value,
-              ingredients: currentPizza.ingredients,
+              ingredients: currentPizza?.ingredients,
             });
           }}
           disabled={!!initializedPizza?.name}
