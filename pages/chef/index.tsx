@@ -102,11 +102,6 @@ const ChefPage = () => {
       });
     }
 
-    console.log(
-      { copyAvailToppings, toppingsList },
-      "IN HANDLE TOPPING QUANTITY"
-    );
-
     setToppingsList(copyAvailToppings);
 
     // TODO: Decrement from the available toppings;
@@ -265,25 +260,27 @@ const ChefPage = () => {
       return { name: ingredient.name, quantity: ingredient.quantity };
     });
 
-    let existingIngredients = pizzaCopy.ingredients.filter(
+    let nonExistingIngredients = pizzaCopy.ingredients.filter(
       (ingredient) => ingredient.quantity < 1
     );
-
-    console.log({ existingIngredients });
 
     if (!pizzaCopy?.name) {
       setErrorMessage("NO CUSTOMER NAME CREATED");
 
       return;
-    } else if (existingIngredients.length === pizzaCopy.ingredients.length) {
+    } else if (nonExistingIngredients.length === pizzaCopy.ingredients.length) {
       setErrorMessage(
         "ATTEMPTING TO SAVE PIZZA WITHOUT INGREDIENTS, PLEASE DELETE INSTEAD"
       );
+
+      updateToppings({ variables: { input: newToppingsList } });
+
       return;
     } else {
       updateToppings({ variables: { input: newToppingsList } });
       createPizza({ variables: { input: pizzaCopy } });
       setChefView("Existing");
+      setErrorMessage("");
     }
   };
 
@@ -293,12 +290,13 @@ const ChefPage = () => {
     let pizzaCopy = { name: "", ingredients: [] };
     pizzaCopy.name = currentPizza.name;
 
-    pizzaCopy.ingredients = currentPizza.ingredients.map((ingredient) => {
+    pizzaCopy.ingredients = currentPizza.ingredients?.map((ingredient) => {
       return { name: ingredient.name, quantity: ingredient.quantity };
     });
 
     await deletePizza({ variables: { input: pizzaCopy } });
     setChefView("Existing");
+    setErrorMessage("");
   };
 
   return (
@@ -313,6 +311,7 @@ const ChefPage = () => {
               setCurrentPizza([]);
               setInitializedPizza([]);
               setChefView("Create");
+              setErrorMessage("");
             }}
           >
             Make a new Pizza
@@ -323,6 +322,7 @@ const ChefPage = () => {
         <CreateContainer>
           <button
             onClick={(e) => {
+              setErrorMessage("");
               setCurrentPizza([]);
               setChefView("Existing");
             }}
