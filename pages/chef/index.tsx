@@ -52,10 +52,41 @@ const ChefPage = () => {
     }
   }, [pizzaData]);
 
-  const handleToppingQuantity = (e) => {
-    let value = parseInt(e.target.value);
+  const handleToppingQuantity = (inputTopping) => {
+    console.log({ toppingsList, inputTopping }, "IN HANDLE TOPPING QUANTITY");
 
-    setToppingQuantity(value);
+    let copyAvailToppings = [...toppingsList];
+
+    let filteredList = copyAvailToppings.filter(
+      (topping) => topping.name === inputTopping.name
+    );
+
+    if (filteredList.length) {
+      console.log({ toppingsList, copyAvailToppings });
+
+      copyAvailToppings = copyAvailToppings.map((ingredient) => {
+        let copyIngredient = { ...ingredient };
+
+        if (ingredient.name === inputTopping.name) {
+          copyIngredient.quantity--;
+
+          console.log({ copyIngredient });
+        }
+
+        return copyIngredient;
+      });
+    }
+
+    console.log(
+      { copyAvailToppings, toppingsList },
+      "IN HANDLE TOPPING QUANTITY"
+    );
+
+    setToppingsList(copyAvailToppings);
+
+    // TODO: Decrement from the available toppings;
+
+    // setToppingQuantity(value);
   };
 
   const addIngredientToPizzaList = (topping) => {
@@ -69,11 +100,13 @@ const ChefPage = () => {
       if (filteredIngredient.length) {
         // If ingredient already exists
         copyPizza.ingredients = copyPizza.ingredients.map((ingredient) => {
+          let copyIngredient = { ...ingredient };
+
           if (ingredient.name === topping.name) {
-            ingredient.quantity++;
+            copyIngredient.quantity++;
           }
 
-          return ingredient;
+          return copyIngredient;
         });
 
         setCurrentPizza({
@@ -98,6 +131,8 @@ const ChefPage = () => {
   };
 
   const AvailableToppings = useMemo(() => {
+    console.log({ toppingsList }, "IN AVAILABLE TOPPINGS");
+
     if (!toppingsList.length) return [];
 
     return toppingsList.map((topping) => {
@@ -111,11 +146,20 @@ const ChefPage = () => {
             min={0}
             max={topping.quantity}
             name="quantity"
-            defaultValue={topping.quantity}
+            value={topping.quantity}
+            // defaultValue={topping.quantity}
             disabled
           />
 
-          <button onClick={(e) => addIngredientToPizzaList(topping)}>+</button>
+          <button
+            onClick={(e) => {
+              addIngredientToPizzaList(topping);
+              handleToppingQuantity(topping);
+            }}
+            disabled={topping.quantity === 0}
+          >
+            +
+          </button>
         </div>
       );
     });
