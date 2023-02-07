@@ -130,11 +130,29 @@ const CreatePizzaForm = ({
   };
 
   const checkForExistingCustomerOrder = (pizzaCopy) => {
+    // Checks for name
     let copyNameOfExistingPizza = existingPizzas.filter(
       (pizza: Pizza) => pizza.name == pizzaCopy.name
     );
 
     return copyNameOfExistingPizza;
+  };
+
+  const duplicatedPizzaToppings = (pizzaCopy) => {
+    let failedDuplicateChecks = [];
+    // Checks for name
+    let copyNameOfExistingPizza = existingPizzas.filter(
+      (pizza: Pizza) => pizza.name == pizzaCopy.name
+    );
+
+    // Check for a pizza with matching ingredients and name
+    for (let pizza of copyNameOfExistingPizza) {
+      if (pizza?.ingredients.join("") === pizzaCopy?.ingredients.join("")) {
+        failedDuplicateChecks.push(pizza);
+      }
+    }
+
+    return failedDuplicateChecks;
   };
 
   const handleSubmitPizza = () => {
@@ -153,6 +171,7 @@ const CreatePizzaForm = ({
 
     // Checks to prevent duplicate orders
     let copyNameOfExistingPizza = checkForExistingCustomerOrder(pizzaCopy);
+    let copyOfWholeOrder = duplicatedPizzaToppings(pizzaCopy);
 
     // Confirms dough is in ingredients as it is required
     let checkForDough = pizzaCopy.ingredients.filter(
@@ -165,11 +184,17 @@ const CreatePizzaForm = ({
       setErrorMessage(ErrorMessages.NoCrust);
       return;
     } else if (
+      copyOfWholeOrder?.length &&
+      pizzaCopy.name !== initializedPizza?.name
+    ) {
+      // If whole order matches existing order
+      setErrorMessage(ErrorMessages.NoDuplicates);
+    } else if (
       copyNameOfExistingPizza?.length &&
       pizzaCopy.name !== initializedPizza?.name
     ) {
       // If customer name already in existing pizzas/not initialziedPizza in edit condition
-      setErrorMessage(ErrorMessages.NoDuplicates);
+      setErrorMessage(ErrorMessages.NoDuplicateNames);
       return;
     } else if (!pizzaCopy?.name) {
       setErrorMessage(ErrorMessages.NoCustomer);
