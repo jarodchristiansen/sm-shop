@@ -46,13 +46,14 @@ const ManagerPage = () => {
 
   useEffect(() => {
     // TODO: Move to server side if possible from context to prevent refresh issue
-    // Will probably require cookies instead of localStorage
+    // Will probably require cookie-cutter localStorage methods instead of localStorage
+
     if (role && role === RoleConsts.Manager) {
       getToppings();
     } else {
       router.push("/");
     }
-  }, []);
+  }, [role]);
 
   useEffect(() => {
     if (data?.getCurrentToppings) {
@@ -195,7 +196,6 @@ const ManagerPage = () => {
                   name="quantity"
                   // Linked to standard form to maintain consistency
                   value={toppingQuantity}
-                  // Prevents warning due to value for linking
                   onChange={() => {}}
                 />
               </div>
