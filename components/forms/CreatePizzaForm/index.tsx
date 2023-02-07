@@ -329,18 +329,21 @@ const CreatePizzaForm = ({
       {AvailableToppings &&
         CurrentPizzaIngredients &&
         (!loading || !updateToppingsLoading || !createPizzaLoading) && (
-          <ListsContainer>
-            <div className="available-toppings-table">
-              <h4>Available Ingredients</h4>
-              {AvailableToppings}
-            </div>
+          <>
+            <span>1 Crust Dough is the only required ingredient</span>
+            <ListsContainer>
+              <div className="available-toppings-table">
+                <h4>Available Ingredients</h4>
+                {AvailableToppings}
+              </div>
 
-            <div className="current-pizza-table">
-              <h4>Current Pizza</h4>
+              <div className="current-pizza-table">
+                <h4>Current Pizza</h4>
 
-              {CurrentPizzaIngredients}
-            </div>
-          </ListsContainer>
+                {CurrentPizzaIngredients}
+              </div>
+            </ListsContainer>
+          </>
         )}
 
       {errorMessage && (
