@@ -18,6 +18,15 @@ interface CreatePizzaFormProps {
   existingPizzas: Pizza[] | [];
 }
 
+/**
+ *
+ * @param currentPizza: Existing pizza order in edit, or null in case of create new pizza
+ * @param setCurrentPizza: setState call to select current pizza for edit/create
+ * @param setChefView: changes the view of chef screen allowing view/edit/create
+ * @param initializedPizza: set in case of edit pizza to signify it is existing order rather than new
+ * @param existingPizzas: existing orders retrieved from DB
+ * @returns Chef Pizza Form allowing view/create/edit/delete of pizzas and viewing topping inventory
+ */
 const CreatePizzaForm = ({
   currentPizza,
   setCurrentPizza,
@@ -28,7 +37,6 @@ const CreatePizzaForm = ({
   const [toppingQuantity, setToppingQuantity] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [toppingsList, setToppingsList] = useState([]);
-  const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery(GET_TOPPINGS, {
@@ -72,13 +80,12 @@ const CreatePizzaForm = ({
     );
 
     !!checkForCrusts.length
-      ? setErrorMessage("OUT OF CRUST DOUGH, ADD MORE TO MAKE MORE PIZZAS")
+      ? setErrorMessage(ErrorMessages.NoDough)
       : setErrorMessage("");
   }, [toppingsList, currentPizza?.name]);
 
   const handleToppingQuantity = (inputTopping, step) => {
     // Handles store toppings available to maintain inventory
-
     let copyAvailToppings = [...toppingsList];
 
     let filteredList = copyAvailToppings.filter(
