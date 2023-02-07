@@ -1,11 +1,8 @@
-import { MediaQueries } from "@/styles/MediaQueries";
 import { useSession } from "next-auth/react";
-import Head from "next/head";
-import styled from "styled-components";
 import Image from "next/image";
+import { useContext } from "react";
+import styled from "styled-components";
 import { Role_data } from "../contexts/role";
-import { useContext, useEffect } from "react";
-import { useRouter } from "next/router";
 import { RoleConsts } from "../helpers/consts/roles";
 
 export default function Home() {
@@ -13,10 +10,10 @@ export default function Home() {
   const { role, setRole } = useContext(Role_data);
 
   return (
-    <AlternateHomePageWrapper>
+    <HomePageWrapper>
       <div>
         <div className="top-card">
-          <h1>StrongMind Pizza</h1>
+          <h1>Strongmind Pizza</h1>
           <h4>
             Click to select your job title and routes will enable themselves
           </h4>
@@ -50,17 +47,22 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </AlternateHomePageWrapper>
+    </HomePageWrapper>
   );
 }
 
-const AlternateHomePageWrapper = styled.div`
+const HomePageWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
   justify-content: center;
   align-items: center;
   padding: 2rem;
+
+  h1 {
+    color: rgba(253, 181, 21, 1);
+    text-transform: uppercase;
+  }
 
   .top-card {
     display: flex;

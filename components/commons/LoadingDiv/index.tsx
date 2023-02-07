@@ -3,7 +3,7 @@
  * @returns Loading indicator
  */
 const LoadingDiv = () => {
-  return <div>Loading ...</div>;
+  return <div data-testid="loading-div">Loading ...</div>;
 };
 
 export default LoadingDiv;

@@ -9,42 +9,21 @@ import { useRouter } from "next/dist/client/router";
  * @returns Site Layout Wrapper
  */
 function Layout(props) {
-  const [isPurplePath, setIsPurplePath] = useState(false);
-
   const router = useRouter();
-  const { asPath } = router;
-
-  let purpleBackgroundList = ["/auth"];
-
-  useEffect(() => {
-    determineLayoutBackground();
-  }, [asPath]);
-
-  const determineLayoutBackground = () => {
-    if (asPath.includes("/auth") || asPath.includes("/assets/")) {
-      setIsPurplePath(true);
-    } else {
-      setIsPurplePath(false);
-    }
-  };
 
   return (
-    <LayoutContainer isPurplePath={isPurplePath}>
+    <LayoutContainer>
       <Header />
       <main>{props.children}</main>
     </LayoutContainer>
   );
 }
 
-interface LayoutProps {
-  isPurplePath: boolean;
-}
-
-const LayoutContainer = styled.div<LayoutProps>`
+const LayoutContainer = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
-  background: ${(props) => props.isPurplePath && "#f5f5f54c"};
+
   background: linear-gradient(
     180deg,
     rgba(235, 233, 255, 1) 0%,
