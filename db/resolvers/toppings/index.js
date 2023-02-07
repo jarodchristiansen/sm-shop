@@ -1,4 +1,5 @@
 import Toppings from "../../models/topping";
+import Pizzas from "../../models/pizza";
 
 export const ToppingsResolver = {
   queries: {
@@ -35,6 +36,17 @@ export const ToppingsResolver = {
 
     removeTopping: async (_, { name }) => {
       try {
+        let pizzas = await Pizzas.find({});
+
+        for (let pizza of pizzas) {
+          for (let ingredient of pizza.ingredients) {
+            if (ingredient.name === name) {
+              ingredient.remove();
+              pizza.save();
+            }
+          }
+        }
+
         let toppingsList = await Toppings.findOne({ name }).remove();
         return toppingsList;
       } catch (err) {
@@ -50,8 +62,6 @@ export const ToppingsResolver = {
             { quantity: topping.quantity }
           );
           let result = await existingTopping.save();
-          // let updatedTopping = new Toppings(topping);
-          // let result = await updatedTopping.save();
         }
 
         return input;
