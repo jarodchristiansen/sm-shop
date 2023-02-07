@@ -9,8 +9,8 @@ import { MediaQueries } from "@/styles/MediaQueries";
 import { Colors } from "@/styles/Colors";
 import { motion } from "framer-motion";
 import { RoleConsts } from "@/helpers/consts/roles";
-
 import { Role_data } from "../../contexts/role";
+
 /**
  *
  * @returns Header component above pages

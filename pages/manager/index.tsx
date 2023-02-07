@@ -223,7 +223,7 @@ const ManagerPage = () => {
             type="text"
             name="topping_name"
             value={toppingInput}
-            onChange={(e) => console.log({ toppingInput })}
+            onChange={(e) => {}}
             disabled={!!selectedTopping}
           />
 
@@ -234,7 +234,7 @@ const ManagerPage = () => {
             max={100}
             name="quantity"
             value={toppingQuantity}
-            onChange={() => console.log({ toppingQuantity })}
+            onChange={() => {}}
           />
         </div>
 

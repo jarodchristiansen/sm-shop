@@ -1,6 +1,11 @@
 import cookieCutter from "cookie-cutter";
 const Cryptr = require("cryptr");
 
+/**
+ *
+ * @param identity: Name of cache identity to store values under
+ * @param values: Items being stored/role
+ */
 export const StoreLocalKeys = (identity, values) => {
   const cryptr = new Cryptr(process.env.NEXT_PUBLIC_SECRET);
 
@@ -14,6 +19,11 @@ export const StoreLocalKeys = (identity, values) => {
   // localStorage.setItem(identity, values);
 };
 
+/**
+ *
+ * @param identity: Name of cache identity to get valus from
+ * @returns: values resolved from cache or nothing
+ */
 export const GetLocalKeys = (identity) => {
   const cryptr = new Cryptr(process.env.NEXT_PUBLIC_SECRET);
 

@@ -29,7 +29,7 @@ export const authOptions = {
           const user = await User.findOne({
             email: "jarodchristiansendevelopment@gmail.com",
           });
-          console.log({ credentials, req, user }, "IN CRED PROVIDER");
+
           if (user) {
             return user;
           }
@@ -57,7 +57,6 @@ export const authOptions = {
     async signIn({ user, account, profile, email, credentials }) {
       let userEmail = user?.email;
 
-      console.log({ user, userEmail });
       // let existingUser = await User.findOne({ email: userEmail });
 
       // if (existingUser) {
