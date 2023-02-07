@@ -7,6 +7,7 @@ import { Role_data } from "../../contexts/role";
 import { useRouter } from "next/router";
 import LoadingDiv from "@/components/commons/LoadingDiv";
 import { Topping } from "@/helpers/types";
+import { IngrdientConsts } from "@/helpers/consts/ingredients";
 
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
@@ -140,7 +141,8 @@ const ManagerPage = () => {
     if (!toppingsList.length) return [];
 
     let checkForCrusts = toppingsList.filter(
-      (topping) => topping.name.includes("Dough") && topping.quantity < 1
+      (topping) =>
+        topping.name.includes(IngrdientConsts.Dough) && topping.quantity < 1
     );
 
     !!checkForCrusts.length
@@ -158,7 +160,7 @@ const ManagerPage = () => {
             </div>
           ) : (
             <div className="selected-topping-row">
-              {!topping.name.includes("Dough") && (
+              {!topping.name.includes(IngrdientConsts.Dough) && (
                 <button
                   onClick={(e) => {
                     handleRemoveIngredient(e, topping);

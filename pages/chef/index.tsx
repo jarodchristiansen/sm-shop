@@ -5,10 +5,11 @@ import { GET_EXISTING_PIZZAS } from "@/helpers/queries/pizzas";
 import CreatePizzaForm from "@/components/forms/CreatePizzaForm";
 import { Pizza } from "@/helpers/types";
 import LoadingDiv from "@/components/commons/LoadingDiv";
+import { ViewConsts } from "@/helpers/consts/views";
 
 const ChefPage = () => {
   const [existingPizzas, setExistingPizzas] = useState([]);
-  const [chefView, setChefView] = useState("Existing");
+  const [chefView, setChefView] = useState(ViewConsts.chefView.Existing);
   const [currentPizza, setCurrentPizza] = useState<Pizza | null>(null);
   const [initializedPizza, setInitializedPizza] = useState<Pizza | null>(null);
 
@@ -38,13 +39,13 @@ const ChefPage = () => {
   const startNewPizza = () => {
     setCurrentPizza(null);
     setInitializedPizza(null);
-    setChefView("Create");
+    setChefView(ViewConsts.chefView.Create);
   };
 
   const editExistingPizza = (pizza) => {
     setInitializedPizza(pizza);
     setCurrentPizza(pizza);
-    setChefView("Create");
+    setChefView(ViewConsts.chefView.Create);
   };
 
   const ExistingPizzas = useMemo(() => {

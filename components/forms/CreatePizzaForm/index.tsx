@@ -9,6 +9,8 @@ import { Pizza } from "@/helpers/types";
 import LoadingDiv from "@/components/commons/LoadingDiv";
 import { MediaQueries } from "@/styles/MediaQueries";
 import { ErrorMessages } from "@/helpers/consts/errors";
+import { ViewConsts } from "@/helpers/consts/views";
+import { IngrdientConsts } from "@/helpers/consts/ingredients";
 
 interface CreatePizzaFormProps {
   currentPizza: Pizza | null;
@@ -34,7 +36,6 @@ const CreatePizzaForm = ({
   initializedPizza,
   existingPizzas,
 }: CreatePizzaFormProps) => {
-  const [toppingQuantity, setToppingQuantity] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [toppingsList, setToppingsList] = useState([]);
 
@@ -76,7 +77,8 @@ const CreatePizzaForm = ({
 
   useEffect(() => {
     let checkForCrusts = toppingsList.filter(
-      (topping) => topping.name.includes("Dough") && topping.quantity < 1
+      (topping) =>
+        topping.name.includes(IngrdientConsts.Dough) && topping.quantity < 1
     );
 
     !!checkForCrusts.length
@@ -122,7 +124,7 @@ const CreatePizzaForm = ({
     });
 
     await deletePizza({ variables: { input: pizzaCopy } });
-    setChefView("Existing");
+    setChefView(ViewConsts.chefView.Existing);
     setErrorMessage("");
   };
 
@@ -175,7 +177,7 @@ const CreatePizzaForm = ({
       // Updates toppings while creating pizza to manage total inventory
       updateToppings({ variables: { input: newToppingsList } });
       createPizza({ variables: { input: pizzaCopy } });
-      setChefView("Existing");
+      setChefView(ViewConsts.chefView.Existing);
       setErrorMessage("");
     }
   };
@@ -262,7 +264,7 @@ const CreatePizzaForm = ({
         </div>
       );
     });
-  }, [toppingsList, toppingQuantity, currentPizza]);
+  }, [toppingsList, currentPizza]);
 
   const CurrentPizzaIngredients = useMemo(() => {
     if (!currentPizza?.ingredients?.length) return [];
@@ -298,12 +300,12 @@ const CreatePizzaForm = ({
         );
       }
     });
-  }, [currentPizza, toppingQuantity, toppingsList]);
+  }, [currentPizza, toppingsList]);
 
   const resetToMainChefPage = () => {
     setErrorMessage("");
     setCurrentPizza(null);
-    setChefView("Existing");
+    setChefView(ViewConsts.chefView.Existing);
   };
 
   return (
