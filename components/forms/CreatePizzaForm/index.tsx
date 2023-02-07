@@ -132,8 +132,9 @@ const CreatePizzaForm = ({
       (pizza: Pizza) => pizza.name == pizzaCopy.name
     );
 
-    let checkForDough = pizzaCopy.ingredients.filter((ingredient) =>
-      ingredient.name.includes("Dough")
+    let checkForDough = pizzaCopy.ingredients.filter(
+      (ingredient) =>
+        ingredient.name.includes("Dough") && ingredient.quantity > 0
     );
 
     // If chef doesn't include dough
@@ -344,7 +345,7 @@ const CreatePizzaForm = ({
 
       {errorMessage && (
         <div>
-          <h4>{errorMessage}</h4>
+          <h4 className="error-message">{errorMessage}</h4>
         </div>
       )}
 
@@ -361,6 +362,10 @@ const CreateContainer = styled.div`
   flex-direction: column;
   gap: 3rem;
   align-items: center;
+
+  .error-message {
+    color: red;
+  }
 `;
 
 const ListsContainer = styled.div`
