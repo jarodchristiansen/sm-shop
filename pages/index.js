@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Role_data } from "../contexts/role";
 import { useContext, useEffect } from "react";
 import { useRouter } from "next/router";
+import { RoleConsts } from "../helpers/consts/roles";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -31,7 +32,7 @@ export default function Home() {
                 alt="chef"
               />
 
-              {role === "Manager" && <div className="selected-div" />}
+              {role === RoleConsts.Manager && <div className="selected-div" />}
             </div>
 
             <div onClick={(e) => setRole("Chef")} className="role-card">
@@ -44,7 +45,7 @@ export default function Home() {
                 alt="chef"
               />
 
-              {role === "Chef" && <div className="selected-div" />}
+              {role === RoleConsts.Chef && <div className="selected-div" />}
             </div>
           </div>
         </div>

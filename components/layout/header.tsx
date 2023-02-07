@@ -1,15 +1,16 @@
+import { RoleConsts } from "@/helpers/consts/roles";
+import { Colors } from "@/styles/Colors";
+import { MediaQueries } from "@/styles/MediaQueries";
+import { motion } from "framer-motion";
+import { signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
-import { Navbar, Container, Nav, NavDropdown } from "react-bootstrap";
-import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import { Container, Nav, Navbar } from "react-bootstrap";
 import styled from "styled-components";
-import { MediaQueries } from "@/styles/MediaQueries";
-import { Colors } from "@/styles/Colors";
-import { motion } from "framer-motion";
-
 import { Role_data } from "../../contexts/role";
+
 /**
  *
  * @returns Header component above pages
@@ -23,10 +24,6 @@ function Header() {
   const router = useRouter();
   const { asPath } = router;
 
-  const handleSignin = (e) => {
-    e.preventDefault();
-    signIn();
-  };
   const handleSignout = (e) => {
     e.preventDefault();
     setSelectedRoute("");
@@ -41,13 +38,13 @@ function Header() {
     {
       key: 1,
       route: "/manager",
-      guarded: role === "Manager",
+      guarded: role === RoleConsts.Manager,
       text: "Manager",
     },
     {
       key: 2,
       route: `/chef`,
-      guarded: role === "Chef" || role == "Manager",
+      guarded: role === RoleConsts.Chef || role == RoleConsts.Manager,
       text: "Chef",
     },
     // !session && {
@@ -67,6 +64,8 @@ function Header() {
 
     if (matchingRoute.length) {
       setSelectedRoute(matchingRoute[0].key);
+    } else {
+      setSelectedRoute("");
     }
   };
 
@@ -99,9 +98,7 @@ function Header() {
             <motion.div
               initial={{ y: 0 }}
               animate={{ y: [7, 0] }}
-              // exit={{ y: 300, opacity: 0 }}
               transition={{
-                // type: "spring",
                 duration: 3,
                 damping: 20,
                 repeat: Infinity,

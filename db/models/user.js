@@ -34,10 +34,6 @@ const UsersSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
-  favorites: {
-    type: [{ title: String, symbol: String, image: String }],
-    default: [],
-  },
 });
 
 UsersSchema.index({ name: "text" });

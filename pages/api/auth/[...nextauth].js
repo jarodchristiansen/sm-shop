@@ -1,12 +1,5 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import FacebookProvider from "next-auth/providers/facebook";
-import GithubProvider from "next-auth/providers/github";
-import TwitterProvider from "next-auth/providers/twitter";
-import Auth0Provider from "next-auth/providers/auth0";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
-// import AppleProvider from "next-auth/providers/apple"
-// import EmailProvider from "next-auth/providers/email"
 import clientPromise from "../../../lib/mongodb";
 import User from "../../../db/models/user";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -28,44 +21,15 @@ export const authOptions = {
   // https://next-auth.js.org/configuration/providers/oauth
   adapter: MongoDBAdapter(clientPromise),
   providers: [
-    /* EmailProvider({
-         server: process.env.EMAIL_SERVER,
-         from: process.env.EMAIL_FROM,
-       }),
-    // Temporarily removing the Apple provider from the demo site as the
-    // callback URL for it needs updating due to Vercel changing domains
-    Providers.Apple({
-      clientId: process.env.APPLE_ID,
-      clientSecret: {
-        appleId: process.env.APPLE_ID,
-        teamId: process.env.APPLE_TEAM_ID,
-        privateKey: process.env.APPLE_PRIVATE_KEY,
-        keyId: process.env.APPLE_KEY_ID,
-      },
-    }),
-    */
-    // FacebookProvider({
-    //   clientId: process.env.FACEBOOK_ID,
-    //   clientSecret: process.env.FACEBOOK_SECRET,
-    // }),
-
-    // GithubProvider({
-    //   clientId: process.env.GITHUB_ID,
-    //   clientSecret: process.env.GITHUB_SECRET,
-    // }),
-    // GoogleProvider({
-    //   clientId: process.env.GOOGLE_ID,
-    //   clientSecret: process.env.GOOGLE_SECRET,
-    // }),
     CredentialsProvider({
-      id: "intranet-credentials",
-      name: "Two Factor Auth",
+      id: "pizza-sho-credentails",
+      name: "Role Resolver for session/pages",
       async authorize(credentials, req) {
         try {
           const user = await User.findOne({
             email: "jarodchristiansendevelopment@gmail.com",
           });
-          console.log({ credentials, req, user }, "IN CRED PROVIDER");
+
           if (user) {
             return user;
           }
@@ -74,15 +38,6 @@ export const authOptions = {
         }
       },
     }),
-    // TwitterProvider({
-    //   clientId: process.env.TWITTER_ID,
-    //   clientSecret: process.env.TWITTER_SECRET,
-    // }),
-    // Auth0Provider({
-    //   clientId: process.env.AUTH0_ID,
-    //   clientSecret: process.env.AUTH0_SECRET,
-    //   issuer: process.env.AUTH0_ISSUER,
-    // }),
   ],
   theme: {
     colorScheme: "light",
@@ -102,7 +57,6 @@ export const authOptions = {
     async signIn({ user, account, profile, email, credentials }) {
       let userEmail = user?.email;
 
-      console.log({ user, userEmail });
       // let existingUser = await User.findOne({ email: userEmail });
 
       // if (existingUser) {

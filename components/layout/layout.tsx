@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
 import Header from "./header";
-import Footer from "./footer";
 import styled from "styled-components";
 import { useRouter } from "next/dist/client/router";
 
@@ -33,8 +32,6 @@ function Layout(props) {
     <LayoutContainer isPurplePath={isPurplePath}>
       <Header />
       <main>{props.children}</main>
-
-      <Footer />
     </LayoutContainer>
   );
 }
@@ -46,6 +43,7 @@ interface LayoutProps {
 const LayoutContainer = styled.div<LayoutProps>`
   display: flex;
   flex-direction: column;
+  position: relative;
   background: ${(props) => props.isPurplePath && "#f5f5f54c"};
   background: linear-gradient(
     180deg,

@@ -26,11 +26,7 @@ const typeDefs = gql`
     username: String
     image: String
     createAt: Date
-  }
-
-  input UsernameInput {
-    username: String!
-    email: String
+    role: String
   }
 
   type Topping {
@@ -43,12 +39,6 @@ const typeDefs = gql`
     ingredients: [Topping]
   }
 
-  type Query {
-    getExistingPizzas: [Pizza]
-    getCurrentToppings: [Topping]
-    getUser(email: String, id: String): User
-  }
-
   input ToppingsInput {
     name: String
     quantity: Float
@@ -59,13 +49,18 @@ const typeDefs = gql`
     ingredients: [ToppingsInput]
   }
 
+  type Query {
+    getExistingPizzas: [Pizza]
+    getCurrentToppings: [Topping]
+    getUser(email: String, id: String): User
+  }
+
   type Mutation {
     deletePizza(input: PizzaInput): Pizza
     createPizza(input: PizzaInput): Pizza
     updateToppings(input: [ToppingsInput]): [Topping]
     removeTopping(name: String): Topping
     addTopping(name: String, quantity: Float): Topping
-    updateUsername(input: UsernameInput): User
   }
 `;
 

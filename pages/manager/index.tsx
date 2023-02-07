@@ -7,21 +7,28 @@ import { Role_data } from "../../contexts/role";
 import { useRouter } from "next/router";
 import LoadingDiv from "@/components/commons/LoadingDiv";
 import { Topping } from "@/helpers/types";
+import { IngrdientConsts } from "@/helpers/consts/ingredients";
+import { RoleConsts } from "@/helpers/consts/roles";
+import { MediaQueries } from "@/styles/MediaQueries";
 
+/**
+ *
+ * @returns Manager page allowing manager role to update inventory
+ */
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
   const [toppingInput, setToppingInput] = useState("");
   const [toppingQuantity, setToppingQuantity] = useState<string | number>("");
   const [selectedTopping, setSelectedTopping] = useState("");
 
-  const { role, setRole } = useContext(Role_data);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const { role } = useContext(Role_data);
 
   const router = useRouter();
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
-    useLazyQuery(GET_TOPPINGS, {
-      fetchPolicy: "cache-and-network",
-    });
+    useLazyQuery(GET_TOPPINGS);
 
   const [
     addTopping,
@@ -38,9 +45,9 @@ const ManagerPage = () => {
   });
 
   useEffect(() => {
-    // TODO: Move to server side if possible from context
+    // TODO: Move to server side if possible from context to prevent refresh issue
     // Will probably require cookies instead of localStorage
-    if (role && role === "Manager") {
+    if (role && role === RoleConsts.Manager) {
       getToppings();
     } else {
       router.push("/");
@@ -88,9 +95,10 @@ const ManagerPage = () => {
       });
     } else {
       // TODO: build in confirmation/declanation of the message if not in editm
-      alert(
-        "Topping already exists, would you like to replace the quantity of this topping instead?"
-      );
+      if (!selectedTopping) {
+        alert("Topping already exists, this will update the existing quantity");
+      }
+
       let filteredTopping = toppingsList.filter(
         (topping) => topping.name === toppingInput
       );
@@ -138,46 +146,61 @@ const ManagerPage = () => {
   const ToppingsItems = useMemo(() => {
     if (!toppingsList.length) return [];
 
+    let checkForCrusts = toppingsList.filter(
+      (topping) =>
+        topping.name.includes(IngrdientConsts.Dough) && topping.quantity < 1
+    );
+
+    !!checkForCrusts.length
+      ? setErrorMessage("OUT OF CRUST DOUGH, ADD MORE TO MAKE MORE PIZZAS")
+      : setErrorMessage("");
+
     return toppingsList.map((topping) => {
       return (
         <div key={topping.name}>
           {topping.name !== selectedTopping ? (
             <div className="standard-row">
-              <span>Topping: {topping.name}</span>
+              <span>{topping.name}</span>
               <span>Quantity: {topping.quantity}</span>
               <button onClick={(e) => handleEditField(topping)}>Edit</button>
             </div>
           ) : (
             <div className="selected-topping-row">
-              <button
-                onClick={(e) => {
-                  handleRemoveIngredient(e, topping);
-                }}
-              >
-                X
-              </button>
-
-              <button onClick={() => handleClearFields()}>Cancel Edit</button>
+              {!topping.name.includes(IngrdientConsts.Dough) && (
+                <button
+                  onClick={(e) => {
+                    handleRemoveIngredient(e, topping);
+                  }}
+                >
+                  Delete
+                </button>
+              )}
 
               <div>
-                <label htmlFor="topping_name">Topping Name</label>
+                <label htmlFor="topping_name">Topping: </label>
                 <input
                   type="text"
                   name="topping_name"
                   defaultValue={topping.name}
+                  disabled
                 />
               </div>
 
               <div>
-                <label htmlFor="quantity">Quantity Avail</label>
+                <label htmlFor="quantity">Available: </label>
                 <input
                   type="number"
-                  min={1}
+                  min={0}
                   max={100}
                   name="quantity"
-                  defaultValue={topping.quantity}
+                  // Linked to standard form to maintain consistency
+                  value={toppingQuantity}
+                  // Prevents warning due to value for linking
+                  onChange={() => {}}
                 />
               </div>
+
+              <button onClick={() => handleClearFields()}>Cancel Edit</button>
 
               <button type="submit" disabled={submitDisabled}>
                 Submit
@@ -187,7 +210,7 @@ const ManagerPage = () => {
         </div>
       );
     });
-  }, [toppingsList, selectedTopping, submitDisabled]);
+  }, [toppingsList, selectedTopping, submitDisabled, toppingQuantity]);
 
   return (
     <PageContain>
@@ -200,7 +223,8 @@ const ManagerPage = () => {
             type="text"
             name="topping_name"
             value={toppingInput}
-            onChange={(e) => console.log({ toppingInput })}
+            onChange={(e) => {}}
+            disabled={!!selectedTopping}
           />
 
           <label htmlFor="quantity">Quantity Avail</label>
@@ -210,7 +234,7 @@ const ManagerPage = () => {
             max={100}
             name="quantity"
             value={toppingQuantity}
-            onChange={() => console.log({ toppingQuantity })}
+            onChange={() => {}}
           />
         </div>
 
@@ -223,6 +247,14 @@ const ManagerPage = () => {
         <div className="list-header">
           <h4>Toppings List</h4>
           <span>Add, Edit, or Remove Toppings</span>
+          {errorMessage ? (
+            <span className="error-message">{errorMessage}</span>
+          ) : (
+            <span>
+              Crust Dough is the only required ingredient, all others can be
+              removed/added
+            </span>
+          )}
         </div>
 
         {loading && <LoadingDiv />}
@@ -253,9 +285,22 @@ const ListContainer = styled.div`
 
   .selected-topping-row {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     border: 1px solid gray;
-    border-radius: 5px;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+
+    @media ${MediaQueries.MD} {
+      display: flex;
+      flex-direction: row;
+      border-radius: 5px;
+      padding: 1rem 1rem;
+
+      button {
+        white-space: nowrap;
+      }
+    }
   }
 `;
 
@@ -283,8 +328,16 @@ const ToppingsForm = styled.form`
   }
 
   .list-header {
+    display: flex;
+    flex-direction: column;
     padding: 2rem 0;
     text-align: center;
+    gap: 1rem;
+
+    .error-message {
+      color: red;
+      font-weight: bold;
+    }
   }
 `;
 
