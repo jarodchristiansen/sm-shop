@@ -7,6 +7,8 @@ import { GET_TOPPINGS } from "@/helpers/queries/toppings";
 import { useEffect, useMemo, useState } from "react";
 import { Pizza } from "@/helpers/types";
 import LoadingDiv from "@/components/commons/LoadingDiv";
+import { MediaQueries } from "@/styles/MediaQueries";
+import { ErrorMessages } from "@/helpers/consts/errors";
 
 interface CreatePizzaFormProps {
   currentPizza: Pizza | null;
@@ -64,6 +66,16 @@ const CreatePizzaForm = ({
     }
   }, [data]);
 
+  useEffect(() => {
+    let checkForCrusts = toppingsList.filter(
+      (topping) => topping.name.includes("Dough") && topping.quantity < 1
+    );
+
+    !!checkForCrusts.length
+      ? setErrorMessage("OUT OF CRUST DOUGH, ADD MORE TO MAKE MORE PIZZAS")
+      : setErrorMessage("");
+  }, [toppingsList, currentPizza?.name]);
+
   const handleToppingQuantity = (inputTopping, step) => {
     // Handles store toppings available to maintain inventory
 
@@ -107,15 +119,21 @@ const CreatePizzaForm = ({
     setErrorMessage("");
   };
 
+  const checkForExistingCustomerOrder = (pizzaCopy) => {
+    let copyNameOfExistingPizza = existingPizzas.filter(
+      (pizza: Pizza) => pizza.name == pizzaCopy.name
+    );
+
+    return copyNameOfExistingPizza;
+  };
+
   const handleSubmitPizza = () => {
     // TODO: handle __typename upstream
-    // Creates new copy of toppingslist to remove __typename
     let newToppingsList = toppingsList.map((topping) => {
       return { name: topping.name, quantity: topping.quantity };
     });
 
     //TODO: handle__typename upstream
-    // Creates new copy of currentPizza to remove __typename in ingredients
     let pizzaCopy = { name: "", ingredients: [] };
     pizzaCopy.name = currentPizza?.name;
 
@@ -123,50 +141,28 @@ const CreatePizzaForm = ({
       return { name: ingredient.name, quantity: ingredient.quantity };
     });
 
-    // Checks if user deletes all items on current pizza and attempts submit
-    let nonExistingIngredients = pizzaCopy.ingredients?.filter(
-      (ingredient) => ingredient.quantity < 1
-    );
+    // Checks to prevent duplicate orders
+    let copyNameOfExistingPizza = checkForExistingCustomerOrder(pizzaCopy);
 
-    let copyNameOfExistingPizza = existingPizzas.filter(
-      (pizza: Pizza) => pizza.name == pizzaCopy.name
-    );
-
+    // Confirms dough is in ingredients as it is required
     let checkForDough = pizzaCopy.ingredients.filter(
       (ingredient) =>
         ingredient.name.includes("Dough") && ingredient.quantity > 0
     );
 
-    // If chef doesn't include dough
     if (!checkForDough.length) {
-      setErrorMessage("MUST USE DOUGH FOR CRUST");
+      // If chef doesn't include dough
+      setErrorMessage(ErrorMessages.NoCrust);
       return;
-    }
-
-    // If customer name already in existing pizzas/not initialziedPizza in edit condition
-    if (
+    } else if (
       copyNameOfExistingPizza?.length &&
       pizzaCopy.name !== initializedPizza?.name
     ) {
-      setErrorMessage(
-        "CANNOT CREATE DUPLICATE OF EXISTING PIZZA, PLEASE CHANGE CUSTOMER NAME TO ACCOMODATE"
-      );
+      // If customer name already in existing pizzas/not initialziedPizza in edit condition
+      setErrorMessage(ErrorMessages.NoDuplicates);
       return;
-    }
-
-    if (!pizzaCopy?.name) {
-      setErrorMessage("NO CUSTOMER NAME CREATED");
-
-      return;
-    } else if (
-      nonExistingIngredients?.length === pizzaCopy?.ingredients?.length
-    ) {
-      setErrorMessage(
-        "ATTEMPTING TO SAVE PIZZA WITHOUT INGREDIENTS, PLEASE ADD INGREDIENTS OR USE THE DELETE KEY"
-      );
-
-      updateToppings({ variables: { input: newToppingsList } });
-
+    } else if (!pizzaCopy?.name) {
+      setErrorMessage(ErrorMessages.NoCustomer);
       return;
     } else {
       // Updates toppings while creating pizza to manage total inventory
@@ -235,10 +231,10 @@ const CreatePizzaForm = ({
 
     return toppingsList.map((topping) => {
       return (
-        <div key={topping.name} className="available-topping-row">
-          <span>Topping: {topping.name} </span>
+        <div key={topping.name} className="topping-row">
+          <span>{topping.name} </span>
 
-          <div>
+          <div className="quantity-input-container">
             <label htmlFor="quantity">x</label>
             <input
               type="number"
@@ -267,10 +263,23 @@ const CreatePizzaForm = ({
     return currentPizza.ingredients.map((topping) => {
       if (topping.quantity) {
         return (
-          <div key={topping.name}>
-            <span>Topping: {topping.name}</span>
+          <div key={topping.name} className="topping-row">
+            <div>
+              <span>{topping.name}</span>
+            </div>
 
-            <label htmlFor="quantity">x</label>
+            <div className="quantity-input-container">
+              <label htmlFor="quantity">x</label>
+
+              <input
+                type="number"
+                min={0}
+                max={topping.quantity}
+                name="quantity"
+                value={topping.quantity}
+                disabled
+              />
+            </div>
 
             <button
               onClick={(e) => handleIngredientInventory(topping, "decrement")}
@@ -278,15 +287,6 @@ const CreatePizzaForm = ({
             >
               -
             </button>
-
-            <input
-              type="number"
-              min={0}
-              max={topping.quantity}
-              name="quantity"
-              value={topping.quantity}
-              disabled
-            />
           </div>
         );
       }
@@ -332,12 +332,12 @@ const CreatePizzaForm = ({
           <>
             <span>1 Crust Dough is the only required ingredient</span>
             <ListsContainer>
-              <div className="available-toppings-table">
+              <div className="toppings-table">
                 <h4>Available Ingredients</h4>
                 {AvailableToppings}
               </div>
 
-              <div className="current-pizza-table">
+              <div className="toppings-table">
                 <h4>Current Pizza</h4>
 
                 {CurrentPizzaIngredients}
@@ -373,28 +373,32 @@ const CreateContainer = styled.div`
 
 const ListsContainer = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 2rem;
 
-  .available-toppings-table {
+  .toppings-table {
     border: 2px solid black;
     padding: 2rem;
+    width: 100%;
 
-    .available-topping-row {
+    .topping-row {
       display: flex;
       justify-content: space-between;
       border-top: 1px solid gray;
       align-items: center;
+      padding: 1rem;
+      gap: 0.5rem;
+
+      .quantity-input-container {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+      }
     }
   }
 
-  .current-pizza-table {
-    border: 2px solid black;
-    padding: 2rem;
-
-    div {
-      border-top: 1px solid gray;
-    }
+  @media ${MediaQueries.MD} {
+    flex-direction: row;
   }
 `;
 
