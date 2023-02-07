@@ -7,7 +7,6 @@ import { Role_data } from "../../contexts/role";
 import { useRouter } from "next/router";
 import LoadingDiv from "@/components/commons/LoadingDiv";
 import { Topping } from "@/helpers/types";
-import AutoCompleteFields from "@/components/forms/AutoCompleteFields";
 
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
@@ -17,14 +16,12 @@ const ManagerPage = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { role, setRole } = useContext(Role_data);
+  const { role } = useContext(Role_data);
 
   const router = useRouter();
 
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
-    useLazyQuery(GET_TOPPINGS, {
-      fetchPolicy: "cache-and-network",
-    });
+    useLazyQuery(GET_TOPPINGS);
 
   const [
     addTopping,
@@ -41,7 +38,7 @@ const ManagerPage = () => {
   });
 
   useEffect(() => {
-    // TODO: Move to server side if possible from context
+    // TODO: Move to server side if possible from context to prevent refresh issue
     // Will probably require cookies instead of localStorage
     if (role && role === "Manager") {
       getToppings();
@@ -192,7 +189,6 @@ const ManagerPage = () => {
                   name="quantity"
                   // Linked to standard form to maintain consistency
                   value={toppingQuantity}
-                  defaultValue={topping.quantity}
                   // Prevents warning due to value for linking
                   onChange={() => {}}
                 />
