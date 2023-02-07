@@ -25,6 +25,7 @@ function RoleContext({ children }) {
 
   const swapRole = () => {
     if (role) {
+      // TODO: rework cookie-cutter implementation to handle ssr check
       let existingRole = localStorage.getItem("user-role");
 
       if (existingRole && existingRole !== role) {
