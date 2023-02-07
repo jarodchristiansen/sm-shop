@@ -112,6 +112,7 @@ function Header() {
                 height={100}
                 width={120}
                 alt="retail logo"
+                priority
               />
             </motion.div>
           </Link>

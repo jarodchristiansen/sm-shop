@@ -9,11 +9,11 @@ export const UserResolver = {
       if (id) {
         user = await User.find({ username: id })
           .then((res) => res[0].toObject())
-          .catch((err) => console.log("IN GETUSER", { err }));
+          .catch((err) => err);
       } else if (email) {
         user = User.find({ email })
           .then((res) => res[0].toObject())
-          .catch((err) => console.log("IN GETUSER", { err }));
+          .catch((err) => err);
       }
 
       if (user?.favorites) {

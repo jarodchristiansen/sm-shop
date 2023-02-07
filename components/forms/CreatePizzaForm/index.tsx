@@ -42,6 +42,7 @@ const CreatePizzaForm = ({
   const [getToppings, { data, loading, error, refetch, fetchMore }] =
     useLazyQuery(GET_TOPPINGS, {
       fetchPolicy: "cache-and-network",
+      variables: {},
     });
 
   const [
@@ -256,6 +257,7 @@ const CreatePizzaForm = ({
           </div>
 
           <button
+            data-testid={`increment-button-${topping.name.split(" ")[0]}`}
             onClick={(e) => handleIngredientInventory(topping, "increment")}
             disabled={topping.quantity === 0}
           >
@@ -274,7 +276,7 @@ const CreatePizzaForm = ({
         return (
           <div key={topping.name} className="topping-row">
             <div>
-              <span>{topping.name}</span>
+              <span data-testid="ingredient-name">{topping.name}</span>
             </div>
 
             <div className="quantity-input-container">
@@ -291,6 +293,7 @@ const CreatePizzaForm = ({
             </div>
 
             <button
+              data-testid={`decrement-button-${topping.name.split(" ")[0]}`}
               onClick={(e) => handleIngredientInventory(topping, "decrement")}
               disabled={topping.quantity === 0}
             >
@@ -310,13 +313,17 @@ const CreatePizzaForm = ({
 
   return (
     <CreateContainer>
-      <button onClick={(e) => resetToMainChefPage()}>
+      <button
+        data-testid="main-view-button"
+        onClick={(e) => resetToMainChefPage()}
+      >
         See Existing Pizzas
       </button>
 
       <div>
         <label htmlFor="customer_name">Customer:</label>
         <input
+          id="customer-name-input"
           type="text"
           name="customer_name"
           defaultValue={initializedPizza?.name}
@@ -357,13 +364,19 @@ const CreatePizzaForm = ({
 
       {errorMessage && (
         <div>
-          <h4 className="error-message">{errorMessage}</h4>
+          <h4 className="error-message" data-testid="error-message">
+            {errorMessage}
+          </h4>
         </div>
       )}
 
       <div>
-        <button onClick={handleDeletePizza}>Delete</button>
-        <button onClick={handleSubmitPizza}>Save</button>
+        <button data-testid="delete-pizza-button" onClick={handleDeletePizza}>
+          Delete
+        </button>
+        <button data-testid="submit-button" onClick={handleSubmitPizza}>
+          Save
+        </button>
       </div>
     </CreateContainer>
   );
