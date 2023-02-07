@@ -9,6 +9,7 @@ import LoadingDiv from "@/components/commons/LoadingDiv";
 import { Topping } from "@/helpers/types";
 import { IngrdientConsts } from "@/helpers/consts/ingredients";
 import { RoleConsts } from "@/helpers/consts/roles";
+import { MediaQueries } from "@/styles/MediaQueries";
 
 /**
  *
@@ -159,7 +160,7 @@ const ManagerPage = () => {
         <div key={topping.name}>
           {topping.name !== selectedTopping ? (
             <div className="standard-row">
-              <span>Topping: {topping.name}</span>
+              <span>{topping.name}</span>
               <span>Quantity: {topping.quantity}</span>
               <button onClick={(e) => handleEditField(topping)}>Edit</button>
             </div>
@@ -171,14 +172,12 @@ const ManagerPage = () => {
                     handleRemoveIngredient(e, topping);
                   }}
                 >
-                  X
+                  Delete
                 </button>
               )}
 
-              <button onClick={() => handleClearFields()}>Cancel Edit</button>
-
               <div>
-                <label htmlFor="topping_name">Topping Name</label>
+                <label htmlFor="topping_name">Topping: </label>
                 <input
                   type="text"
                   name="topping_name"
@@ -188,7 +187,7 @@ const ManagerPage = () => {
               </div>
 
               <div>
-                <label htmlFor="quantity">Quantity Avail</label>
+                <label htmlFor="quantity">Available: </label>
                 <input
                   type="number"
                   min={0}
@@ -200,6 +199,8 @@ const ManagerPage = () => {
                   onChange={() => {}}
                 />
               </div>
+
+              <button onClick={() => handleClearFields()}>Cancel Edit</button>
 
               <button type="submit" disabled={submitDisabled}>
                 Submit
@@ -284,9 +285,22 @@ const ListContainer = styled.div`
 
   .selected-topping-row {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     border: 1px solid gray;
-    border-radius: 5px;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+
+    @media ${MediaQueries.MD} {
+      display: flex;
+      flex-direction: row;
+      border-radius: 5px;
+      padding: 1rem 1rem;
+
+      button {
+        white-space: nowrap;
+      }
+    }
   }
 `;
 
