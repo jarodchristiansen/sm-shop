@@ -66,6 +66,7 @@ const CreatePizzaForm = ({
 
   const handleToppingQuantity = (inputTopping, step) => {
     // Handles store toppings available to maintain inventory
+
     let copyAvailToppings = [...toppingsList];
 
     let filteredList = copyAvailToppings.filter(
@@ -116,22 +117,36 @@ const CreatePizzaForm = ({
     //TODO: handle__typename upstream
     // Creates new copy of currentPizza to remove __typename in ingredients
     let pizzaCopy = { name: "", ingredients: [] };
-    pizzaCopy.name = currentPizza.name;
+    pizzaCopy.name = currentPizza?.name;
 
-    pizzaCopy.ingredients = currentPizza.ingredients.map((ingredient) => {
+    pizzaCopy.ingredients = currentPizza?.ingredients?.map((ingredient) => {
       return { name: ingredient.name, quantity: ingredient.quantity };
     });
 
     // Checks if user deletes all items on current pizza and attempts submit
-    let nonExistingIngredients = pizzaCopy.ingredients.filter(
+    let nonExistingIngredients = pizzaCopy.ingredients?.filter(
       (ingredient) => ingredient.quantity < 1
     );
 
     let copyNameOfExistingPizza = existingPizzas.filter(
-      (pizza) => pizza.name == pizzaCopy.name
+      (pizza: Pizza) => pizza.name == pizzaCopy.name
     );
 
-    if (copyNameOfExistingPizza?.length) {
+    let checkForDough = pizzaCopy.ingredients.filter((ingredient) =>
+      ingredient.name.includes("Dough")
+    );
+
+    // If chef doesn't include dough
+    if (!checkForDough.length) {
+      setErrorMessage("MUST USE DOUGH FOR CRUST");
+      return;
+    }
+
+    // If customer name already in existing pizzas/not initialziedPizza in edit condition
+    if (
+      copyNameOfExistingPizza?.length &&
+      pizzaCopy.name !== initializedPizza?.name
+    ) {
       setErrorMessage(
         "CANNOT CREATE DUPLICATE OF EXISTING PIZZA, PLEASE CHANGE CUSTOMER NAME TO ACCOMODATE"
       );
@@ -142,9 +157,11 @@ const CreatePizzaForm = ({
       setErrorMessage("NO CUSTOMER NAME CREATED");
 
       return;
-    } else if (nonExistingIngredients.length === pizzaCopy.ingredients.length) {
+    } else if (
+      nonExistingIngredients?.length === pizzaCopy?.ingredients?.length
+    ) {
       setErrorMessage(
-        "ATTEMPTING TO SAVE PIZZA WITHOUT INGREDIENTS, PLEASE DELETE INSTEAD"
+        "ATTEMPTING TO SAVE PIZZA WITHOUT INGREDIENTS, PLEASE ADD INGREDIENTS OR USE THE DELETE KEY"
       );
 
       updateToppings({ variables: { input: newToppingsList } });
@@ -206,6 +223,8 @@ const CreatePizzaForm = ({
   };
 
   const handleIngredientInventory = (topping, step) => {
+    setErrorMessage("");
+
     updateIngredientOnCurrentPizza(topping, step);
     handleToppingQuantity(topping, step);
   };
@@ -250,7 +269,7 @@ const CreatePizzaForm = ({
           <div key={topping.name}>
             <span>Topping: {topping.name}</span>
 
-            <label htmlFor="quantity">quantity</label>
+            <label htmlFor="quantity">x</label>
 
             <button
               onClick={(e) => handleIngredientInventory(topping, "decrement")}
@@ -292,6 +311,7 @@ const CreatePizzaForm = ({
           name="customer_name"
           defaultValue={initializedPizza?.name}
           onChange={(e) => {
+            errorMessage && setErrorMessage("");
             setCurrentPizza({
               name: e.target.value,
               ingredients: currentPizza?.ingredients,
