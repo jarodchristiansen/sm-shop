@@ -26,7 +26,7 @@
           {
             "key": "Content-Security-Policy",
             "value":
-            "style-src 'self' *.gstatic.com *.googleapis.com https://*.icomoon.io; script-src 'self' *.googletagmanager.com; object-src 'none'; base-uri 'none'; require-trusted-types-for 'script';"
+              "script-src 'strict-dynamic' 'nonce-rAnd0m123' 'unsafe-inline' http: https:; object-src 'none'; base-uri 'none'; require-trusted-types-for 'script'; report-uri https://csp.example.com;"
           }
         ]
       }
