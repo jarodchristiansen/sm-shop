@@ -41,8 +41,8 @@ export const ToppingsResolver = {
         for (let pizza of pizzas) {
           for (let ingredient of pizza.ingredients) {
             if (ingredient.name === name) {
-              ingredient.remove();
-              pizza.save();
+              await ingredient.remove();
+              await pizza.save();
             }
           }
         }
@@ -50,12 +50,11 @@ export const ToppingsResolver = {
         let toppingsList = await Toppings.findOne({ name }).remove();
         return toppingsList;
       } catch (err) {
-        return err;
+        console.log({ err }, "IN REMOVE TOPPING");
       }
     },
 
     updateToppings: async (_, { input }) => {
-      // Used in create pizza form to manage inventory
       try {
         for (let topping of input) {
           let existingTopping = await Toppings.findOneAndUpdate(
@@ -67,7 +66,7 @@ export const ToppingsResolver = {
 
         return input;
       } catch (err) {
-        return err;
+        return error;
       }
     },
   },
