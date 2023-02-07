@@ -29,25 +29,5 @@ export const UserResolver = {
       return user;
     },
   },
-  mutations: {
-    updateUsername: async (_, { input }) => {
-      const { username, email } = input;
-
-      try {
-        let user = await User.findOne({ email });
-
-        let inputMatch = await User.findOne({ username: username });
-
-        inputMatch && new Error("User name already exists");
-
-        if (user && !inputMatch) {
-          user.username = username;
-          await user.save();
-          return user;
-        }
-      } catch (err) {
-        console.log("Error in updating username!", { err });
-      }
-    },
-  },
+  mutations: {},
 };

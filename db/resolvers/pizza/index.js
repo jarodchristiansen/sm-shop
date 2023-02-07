@@ -34,7 +34,7 @@ export const PizzaResolver = {
           return newPizza;
         }
       } catch (err) {
-        console.log({ err }, "IN CREATE PIZZA");
+        return err;
       }
     },
 
@@ -51,11 +51,11 @@ export const PizzaResolver = {
           }
         }
 
-        let result = await Pizzas.findOne({ name: input.name }).remove();
+        await Pizzas.findOne({ name: input.name }).remove();
 
         return input;
       } catch (err) {
-        console.log({ err });
+        return err;
       }
     },
   },
