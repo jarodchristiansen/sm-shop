@@ -27,7 +27,7 @@ export const authOptions = {
       async authorize(credentials, req) {
         try {
           const user = await User.findOne({
-            email: "jarodchristiansendevelopment@gmail.com",
+            email: credentials.email,
           });
 
           if (user) {
@@ -48,8 +48,6 @@ export const authOptions = {
       return token;
     },
     async session({ session, token, user }) {
-      session.user.username = user.username;
-      session.user.favorites = user.favorites;
       session.user.role = user.role; // Add role value to user object so it is passed along with session
 
       return session;
