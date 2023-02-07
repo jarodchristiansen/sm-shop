@@ -6,6 +6,7 @@ import CreatePizzaForm from "@/components/forms/CreatePizzaForm";
 import { Pizza } from "@/helpers/types";
 import LoadingDiv from "@/components/commons/LoadingDiv";
 import { ViewConsts } from "@/helpers/consts/views";
+import { MediaQueries } from "@/styles/MediaQueries";
 
 /**
  *
@@ -84,7 +85,7 @@ const ChefPage = () => {
 
       {chefView === "Existing" && ExistingPizzas && (
         <ExistingPizzasContainer>
-          {ExistingPizzas}
+          <div className="list-container">{ExistingPizzas}</div>
 
           <button onClick={(e) => startNewPizza()}>Make a new Pizza</button>
         </ExistingPizzasContainer>
@@ -106,9 +107,21 @@ const ChefPage = () => {
 const ExistingPizzasContainer = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
   align-items: center;
   gap: 2rem;
+  width: 100%;
+
+  .list-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+
+    @media ${MediaQueries.MD} {
+      max-width: 60rem;
+    }
+  }
 `;
 
 const PizzaRow = styled.div`
@@ -116,7 +129,6 @@ const PizzaRow = styled.div`
   flex-direction: row;
   border: 2px solid black;
   width: 100%;
-  max-width: 50rem;
   justify-content: space-between;
   padding: 1rem 2rem;
   align-items: center;
@@ -129,6 +141,12 @@ const PizzaRow = styled.div`
     border-left: 1px solid black;
     border-right: 1px solid black;
   }
+
+  button {
+    margin-left: 2rem;
+
+    @media ${MediaQueries.MD};
+  }
 `;
 
 const PageContain = styled.div`
@@ -138,6 +156,18 @@ const PageContain = styled.div`
   justify-content: center;
   align-items: center;
   padding: 2rem 0;
+
+  button {
+    background-color: gray;
+    color: white;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+
+    :disabled {
+      cursor: not-allowed;
+    }
+  }
 `;
 
 export default ChefPage;
