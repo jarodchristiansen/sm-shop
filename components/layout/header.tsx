@@ -8,6 +8,7 @@ import styled from "styled-components";
 import { MediaQueries } from "@/styles/MediaQueries";
 import { Colors } from "@/styles/Colors";
 import { motion } from "framer-motion";
+import { RoleConsts } from "@/helpers/consts/roles";
 
 import { Role_data } from "../../contexts/role";
 /**
@@ -41,13 +42,13 @@ function Header() {
     {
       key: 1,
       route: "/manager",
-      guarded: role === "Manager",
+      guarded: role === RoleConsts.Manager,
       text: "Manager",
     },
     {
       key: 2,
       route: `/chef`,
-      guarded: role === "Chef" || role == "Manager",
+      guarded: role === RoleConsts.Chef || role == RoleConsts.Manager,
       text: "Chef",
     },
     // !session && {

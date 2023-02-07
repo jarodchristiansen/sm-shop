@@ -17,8 +17,6 @@ const cors = Cors({
 });
 
 const server = new ApolloServer({
-  // context: createContext,
-  // schema,
   typeDefs,
   resolvers,
   context: () => {

@@ -7,6 +7,10 @@ import { Pizza } from "@/helpers/types";
 import LoadingDiv from "@/components/commons/LoadingDiv";
 import { ViewConsts } from "@/helpers/consts/views";
 
+/**
+ *
+ * @returns Chef Page allowing chef role to edit existing pizzas/create new ones
+ */
 const ChefPage = () => {
   const [existingPizzas, setExistingPizzas] = useState([]);
   const [chefView, setChefView] = useState(ViewConsts.chefView.Existing);

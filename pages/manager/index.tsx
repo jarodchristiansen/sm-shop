@@ -8,7 +8,12 @@ import { useRouter } from "next/router";
 import LoadingDiv from "@/components/commons/LoadingDiv";
 import { Topping } from "@/helpers/types";
 import { IngrdientConsts } from "@/helpers/consts/ingredients";
+import { RoleConsts } from "@/helpers/consts/roles";
 
+/**
+ *
+ * @returns Manager page allowing manager role to update inventory
+ */
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
   const [toppingInput, setToppingInput] = useState("");
@@ -41,7 +46,7 @@ const ManagerPage = () => {
   useEffect(() => {
     // TODO: Move to server side if possible from context to prevent refresh issue
     // Will probably require cookies instead of localStorage
-    if (role && role === "Manager") {
+    if (role && role === RoleConsts.Manager) {
       getToppings();
     } else {
       router.push("/");
