@@ -2,47 +2,56 @@ import { useMemo, useState } from "react";
 // import { addToCache, fetchCacheItem } from "../../utils/caching";
 import styled from "styled-components";
 
-const AutoCompleteFields = ({ setAirport, label }: any) => {
+interface AutoCompleteFieldsProps {
+  setFormValue?: any;
+  label: string;
+  inputValue: string;
+}
+
+const AutoCompleteFields = ({
+  setFormValue,
+  label,
+  inputValue,
+}: AutoCompleteFieldsProps) => {
   const [suggestedOptions, setSuggestedOptions] = useState([]);
-  const [selectedValue, setSelectedValue] = useState("");
+  const [selectedValue, setSelectedValue] = useState(inputValue);
+
+  console.log({ inputValue, selectedValue }, "IN INPUT");
 
   const fetchAutoSuggest = async (queryString: string) => {
-    let url = `https://api.aviationstack.com/v1/airports?access_key=c409ddd54e832099928e1aa13868e49a&search=${queryString}`;
+    // let url = `https://api.aviationstack.com/v1/airports?access_key=c409ddd54e832099928e1aa13868e49a&search=${queryString}`;
 
-    let cacheCheck;
+    // let suggestOptions;
+    // // TODO: Abstract caching/store/fetch logic into its own reusable
+    // if (typeof cacheCheck == "undefined") {
+    //   let result = await fetch(url).then((res) => {
+    //     let clonedRes = res.clone();
+    //     // let cached = addToCache("Airport Iatas", url, res);
+    //     return clonedRes.json();
+    //   });
 
-    // let cacheCheck = await fetchCacheItem("Airport Iatas", url).then((res) =>
-    //   res?.json()
-    // );
+    //   if (result?.data) {
+    //     suggestOptions = result.data.filter((item: any) =>
+    //       item.iata_code.includes(queryString.toUpperCase())
+    //     );
 
-    let suggestOptions;
-    // TODO: Abstract caching/store/fetch logic into its own reusable
-    if (typeof cacheCheck == "undefined") {
-      let result = await fetch(url).then((res) => {
-        let clonedRes = res.clone();
-        // let cached = addToCache("Airport Iatas", url, res);
-        return clonedRes.json();
-      });
+    //     setSuggestedOptions(suggestOptions);
+    //   }
+    // } else {
+    //   suggestOptions = cacheCheck.data.filter((item: any) =>
+    //     item.iata_code.includes(queryString.toUpperCase())
+    //   );
 
-      if (result?.data) {
-        suggestOptions = result.data.filter((item: any) =>
-          item.iata_code.includes(queryString.toUpperCase())
-        );
+    let suggestOptions = [{ name: "Crust Dough", value: "Crust Dough" }];
 
-        setSuggestedOptions(suggestOptions);
-      }
-    } else {
-      suggestOptions = cacheCheck.data.filter((item: any) =>
-        item.iata_code.includes(queryString.toUpperCase())
-      );
-
-      setSuggestedOptions(suggestOptions);
-    }
+    setSuggestedOptions(suggestOptions);
   };
 
   const handleSearch = (e: any) => {
     let name = e.target.name;
     let value = e.target.value;
+
+    console.log("IN HANDLE SEARCH", { name, value });
 
     if (value.length > 2) {
       fetchAutoSuggest(value);
@@ -56,11 +65,11 @@ const AutoCompleteFields = ({ setAirport, label }: any) => {
       //TODO: Resolve using idx, but maintains order
       return (
         <option
-          key={item.airport_id}
-          value={item.iata_code}
-          onClick={(e) => handleSelectChange(item.iata_code)}
+          key={item.name}
+          value={item.value}
+          onClick={(e) => handleSelectChange(item.value)}
         >
-          {item.airport_name}
+          {item.name}
         </option>
       );
     });
@@ -68,12 +77,12 @@ const AutoCompleteFields = ({ setAirport, label }: any) => {
 
   const handleSelectChange = (value: string) => {
     setSelectedValue(value);
-    setAirport(value);
+    setFormValue(value);
   };
 
   const clearValue = () => {
     setSuggestedOptions([]);
-    setAirport("");
+    setFormValue("");
     // Used solely to track deletion/autocomplete menu rendering
     setSelectedValue("");
   };
@@ -107,8 +116,9 @@ const AutoCompleteFields = ({ setAirport, label }: any) => {
           <label htmlFor={label}>{label}</label>
           <input
             className="form-control"
-            name={label + "-input"}
+            name={label}
             onChange={handleSearch}
+            defaultValue={inputValue}
           />
         </InputColumn>
       )}

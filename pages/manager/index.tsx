@@ -7,12 +7,15 @@ import { Role_data } from "../../contexts/role";
 import { useRouter } from "next/router";
 import LoadingDiv from "@/components/commons/LoadingDiv";
 import { Topping } from "@/helpers/types";
+import AutoCompleteFields from "@/components/forms/AutoCompleteFields";
 
 const ManagerPage = () => {
   const [toppingsList, setToppingsList] = useState([]);
   const [toppingInput, setToppingInput] = useState("");
   const [toppingQuantity, setToppingQuantity] = useState<string | number>("");
   const [selectedTopping, setSelectedTopping] = useState("");
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const { role, setRole } = useContext(Role_data);
 
@@ -88,9 +91,10 @@ const ManagerPage = () => {
       });
     } else {
       // TODO: build in confirmation/declanation of the message if not in editm
-      alert(
-        "Topping already exists, would you like to replace the quantity of this topping instead?"
-      );
+      if (!selectedTopping) {
+        alert("Topping already exists, this will update the existing quantity");
+      }
+
       let filteredTopping = toppingsList.filter(
         (topping) => topping.name === toppingInput
       );
@@ -138,6 +142,14 @@ const ManagerPage = () => {
   const ToppingsItems = useMemo(() => {
     if (!toppingsList.length) return [];
 
+    let checkForCrusts = toppingsList.filter(
+      (topping) => topping.name.includes("Dough") && topping.quantity < 1
+    );
+
+    !!checkForCrusts.length
+      ? setErrorMessage("OUT OF CRUST DOUGH, ADD MORE TO MAKE MORE PIZZAS")
+      : setErrorMessage("");
+
     return toppingsList.map((topping) => {
       return (
         <div key={topping.name}>
@@ -149,13 +161,15 @@ const ManagerPage = () => {
             </div>
           ) : (
             <div className="selected-topping-row">
-              <button
-                onClick={(e) => {
-                  handleRemoveIngredient(e, topping);
-                }}
-              >
-                X
-              </button>
+              {!topping.name.includes("Dough") && (
+                <button
+                  onClick={(e) => {
+                    handleRemoveIngredient(e, topping);
+                  }}
+                >
+                  X
+                </button>
+              )}
 
               <button onClick={() => handleClearFields()}>Cancel Edit</button>
 
@@ -165,6 +179,7 @@ const ManagerPage = () => {
                   type="text"
                   name="topping_name"
                   defaultValue={topping.name}
+                  disabled
                 />
               </div>
 
@@ -172,10 +187,14 @@ const ManagerPage = () => {
                 <label htmlFor="quantity">Quantity Avail</label>
                 <input
                   type="number"
-                  min={1}
+                  min={0}
                   max={100}
                   name="quantity"
+                  // Linked to standard form to maintain consistency
+                  value={toppingQuantity}
                   defaultValue={topping.quantity}
+                  // Prevents warning due to value for linking
+                  onChange={() => {}}
                 />
               </div>
 
@@ -187,7 +206,7 @@ const ManagerPage = () => {
         </div>
       );
     });
-  }, [toppingsList, selectedTopping, submitDisabled]);
+  }, [toppingsList, selectedTopping, submitDisabled, toppingQuantity]);
 
   return (
     <PageContain>
@@ -201,6 +220,7 @@ const ManagerPage = () => {
             name="topping_name"
             value={toppingInput}
             onChange={(e) => console.log({ toppingInput })}
+            disabled={!!selectedTopping}
           />
 
           <label htmlFor="quantity">Quantity Avail</label>
@@ -223,6 +243,14 @@ const ManagerPage = () => {
         <div className="list-header">
           <h4>Toppings List</h4>
           <span>Add, Edit, or Remove Toppings</span>
+          {errorMessage ? (
+            <span className="error-message">{errorMessage}</span>
+          ) : (
+            <span>
+              Crust Dough is the only required ingredient, all others can be
+              removed/added
+            </span>
+          )}
         </div>
 
         {loading && <LoadingDiv />}
@@ -283,8 +311,16 @@ const ToppingsForm = styled.form`
   }
 
   .list-header {
+    display: flex;
+    flex-direction: column;
     padding: 2rem 0;
     text-align: center;
+    gap: 1rem;
+
+    .error-message {
+      color: red;
+      font-weight: bold;
+    }
   }
 `;
 
