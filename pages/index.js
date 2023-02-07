@@ -1,11 +1,8 @@
-import { MediaQueries } from "@/styles/MediaQueries";
 import { useSession } from "next-auth/react";
-import Head from "next/head";
-import styled from "styled-components";
 import Image from "next/image";
+import { useContext } from "react";
+import styled from "styled-components";
 import { Role_data } from "../contexts/role";
-import { useContext, useEffect } from "react";
-import { useRouter } from "next/router";
 import { RoleConsts } from "../helpers/consts/roles";
 
 export default function Home() {
